@@ -2,11 +2,11 @@ psy.faq.intro:
     text: 'Часто задаваемые вопросы об услуге "Помощь психолога"'
     buttons:
         -   text: КАКИЕ УСЛУГИ ВЫ ПРЕДОСТАВЛЯЕТЕ?
-            code: faq.psy.faq.services
+            code: psy.faq.services
         -   text: КАКОВА СТОИМОСТЬ КОНСУЛЬТАЦИЙ И КАКИЕ УСЛОВИЯ ОПЛАТЫ?
-            code: faq.psy.faq.price
+            code: psy.faq.price
         -   text: Пакетные предложения
-            code: faq.psy.faq.pack
+            code: psy.faq.pack
 psy.faq.services:
     text:  |
         КАКИЕ УСЛУГИ ВЫ ПРЕДОСТАВЛЯЕТЕ?
@@ -14,7 +14,7 @@ psy.faq.services:
         • Семейные консультации
     buttons:
         -   text: Назад
-            code: faq.psy.faq.intro
+            code: psy.faq.intro
 psy.faq.price:
     text:  |
         КАКОВА СТОИМОСТЬ КОНСУЛЬТАЦИЙ И КАКИЕ УСЛОВИЯ ОПЛАТЫ?
@@ -23,7 +23,7 @@ psy.faq.price:
         • Оплата производится непосредственно после каждой консультации, принимаются как наличные, так и безналичные средства
     buttons:
         -   text: Назад
-            code: faq.psy.faq.intro
+            code: psy.faq.intro
 psy.faq.pack:
     text:  |
         Пакетные предложения
@@ -32,4 +32,4 @@ psy.faq.pack:
         ситуации.
     buttons:
         -   text: Назад
-            code: faq.psy.faq.intro
+            code: psy.faq.intro
