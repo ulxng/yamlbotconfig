@@ -18,6 +18,8 @@ course.faq.about:
         • Как выстроить рутину без перегрузок
         • Как отслеживать прогресс и не выгорать
     buttons:
+        -   text: Подробнее
+            link: https://github.com/ulxng
         -   text: Назад
             code: course.faq.intro
 

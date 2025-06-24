@@ -28,7 +28,7 @@ func (b *ConfigurableSenderAdapter) Send(c tele.Context, messageKey string) erro
 	markup := &tele.ReplyMarkup{}
 	for _, button := range msg.Buttons {
 		markup.InlineKeyboard = append(markup.InlineKeyboard, []tele.InlineButton{
-			{Text: button.Text, Data: button.Code},
+			{Text: button.Text, Data: button.Code, URL: button.Link},
 		})
 	}
 	if msg.Image != "" {
@@ -39,7 +39,7 @@ func (b *ConfigurableSenderAdapter) Send(c tele.Context, messageKey string) erro
 		file := &tele.Document{File: tele.FromDisk(msg.File), Caption: msg.Text}
 		return c.Send(file, markup)
 	}
-	// только для fsm режима, где все исходящие отправляются методом edit. В edit mode никаких reply кнопок
+	// только для fsm режима, где все исходящие отправляются методом send. В edit mode никаких reply кнопок
 	if len(msg.Answers) == 0 {
 		markup.RemoveKeyboard = true
 	} else {
@@ -62,7 +62,7 @@ func (b *ConfigurableSenderAdapter) Edit(c tele.Context, messageKey string) erro
 	markup := &tele.ReplyMarkup{}
 	for _, button := range msg.Buttons {
 		markup.InlineKeyboard = append(markup.InlineKeyboard, []tele.InlineButton{
-			{Text: button.Text, Data: button.Code},
+			{Text: button.Text, Data: button.Code, URL: button.Link},
 		})
 	}
 	if msg.Image != "" {
