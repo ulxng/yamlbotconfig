@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 	"time"
-	"ulxng/yamlbotconf/messages"
+	"ulxng/yamlbotconf/configurator"
 
 	"github.com/jessevdk/go-flags"
 	tele "gopkg.in/telebot.v4"
@@ -41,8 +41,8 @@ func run(opts options) error {
 		return fmt.Errorf("tele.NewBot: %w", err)
 	}
 
-	loader := messages.NewLoader("messages.yaml")
-	sender := messages.NewConfigurableSenderAdapter(loader)
+	loader := configurator.NewLoader("responses")
+	sender := configurator.NewConfigurableSenderAdapter(loader)
 
 	bot.Handle(tele.OnCallback, func(c tele.Context) error {
 		key := c.Callback().Data
@@ -52,7 +52,7 @@ func run(opts options) error {
 		return sender.Edit(c, key)
 	})
 	bot.Handle("/start", func(c tele.Context) error {
-		return sender.Send(c, "psy.faq.intro")
+		return sender.Send(c, "main.menu")
 	})
 
 	bot.Start()

@@ -1,4 +1,4 @@
-package messages
+package configurator
 
 import tele "gopkg.in/telebot.v4"
 
@@ -10,10 +10,10 @@ type MessageSender interface {
 // ConfigurableSenderAdapter ищет конфигурацию сообщения по ключу и готовит его к отправке.
 // Методы - обертки над с.Send(), c.Edit() и тд
 type ConfigurableSenderAdapter struct {
-	loader Loader
+	loader *Loader
 }
 
-func NewConfigurableSenderAdapter(loader Loader) *ConfigurableSenderAdapter {
+func NewConfigurableSenderAdapter(loader *Loader) *ConfigurableSenderAdapter {
 	return &ConfigurableSenderAdapter{loader: loader}
 }
 
