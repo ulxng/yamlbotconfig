@@ -3,6 +3,7 @@ package configurator
 type Message struct {
 	Text    string   `yaml:"text"`
 	Buttons []Button `yaml:"buttons"`
+	Answers []string `yaml:"answers"`
 	Image   string   `yaml:"image"`
 	File    string   `yaml:"file"`
 }

@@ -1,6 +1,8 @@
 package configurator
 
-import tele "gopkg.in/telebot.v4"
+import (
+	tele "gopkg.in/telebot.v4"
+)
 
 type MessageSender interface {
 	Send(c tele.Context, key string) error
@@ -28,6 +30,17 @@ func (b *ConfigurableSenderAdapter) Send(c tele.Context, messageKey string) erro
 		markup.InlineKeyboard = append(markup.InlineKeyboard, []tele.InlineButton{
 			{Text: button.Text, Data: button.Code},
 		})
+	}
+	// только для fsm режима, где все исходящие отправляются методом edit. В edit mode никаких reply кнопок
+	if len(msg.Answers) == 0 {
+		markup.RemoveKeyboard = true
+	} else {
+		markup.OneTimeKeyboard = true
+		for _, button := range msg.Answers {
+			markup.ReplyKeyboard = append(markup.ReplyKeyboard, []tele.ReplyButton{
+				{Text: button},
+			})
+		}
 	}
 	return c.Send(msg.Text, markup)
 }
