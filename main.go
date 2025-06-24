@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 	"ulxng/yamlbotconf/configurator"
+	"ulxng/yamlbotconf/form/greeting"
 
 	"github.com/jessevdk/go-flags"
 	tele "gopkg.in/telebot.v4"
@@ -43,6 +44,7 @@ func run(opts options) error {
 
 	loader := configurator.NewLoader("responses")
 	sender := configurator.NewConfigurableSenderAdapter(loader)
+	greetingForm := greeting.NewForm(sender)
 
 	bot.Handle(tele.OnCallback, func(c tele.Context) error {
 		key := c.Callback().Data
@@ -53,7 +55,8 @@ func run(opts options) error {
 	})
 	bot.Handle("/start", func(c tele.Context) error {
 		return sender.Send(c, "main.menu")
-	})
+	}, greetingForm.CheckIsFormCompleted)
+	bot.Handle(tele.OnText, greetingForm.HandleStep, greetingForm.CheckIsFormCompleted)
 
 	bot.Start()
 	return nil
