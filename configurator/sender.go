@@ -31,6 +31,14 @@ func (b *ConfigurableSenderAdapter) Send(c tele.Context, messageKey string) erro
 			{Text: button.Text, Data: button.Code},
 		})
 	}
+	if msg.Image != "" {
+		photo := &tele.Photo{File: tele.FromDisk(msg.Image), Caption: msg.Text}
+		return c.Send(photo, markup)
+	}
+	if msg.File != "" {
+		file := &tele.Document{File: tele.FromDisk(msg.File), Caption: msg.Text}
+		return c.Send(file, markup)
+	}
 	// только для fsm режима, где все исходящие отправляются методом edit. В edit mode никаких reply кнопок
 	if len(msg.Answers) == 0 {
 		markup.RemoveKeyboard = true
@@ -56,6 +64,19 @@ func (b *ConfigurableSenderAdapter) Edit(c tele.Context, messageKey string) erro
 		markup.InlineKeyboard = append(markup.InlineKeyboard, []tele.InlineButton{
 			{Text: button.Text, Data: button.Code},
 		})
+	}
+	if msg.Image != "" {
+		photo := &tele.Photo{File: tele.FromDisk(msg.Image), Caption: msg.Text}
+		return c.Send(photo, markup)
+	}
+	if msg.File != "" {
+		file := &tele.Document{File: tele.FromDisk(msg.File), Caption: msg.Text}
+		return c.Send(file, markup)
+	}
+	if c.Message().Text == "" {
+		// для предотвращения ошибки telegram: Bad Request: there is no text in the message to edit (400)
+		// происходит, когда пытаешься сделать edit на сообщениях с кнопками и файлом/картинкой
+		return c.Send(msg.Text, markup)
 	}
 	return c.Edit(msg.Text, markup)
 }

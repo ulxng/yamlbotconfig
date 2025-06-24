@@ -16,6 +16,7 @@ support.faq.contact:
         • Напишите в чат на сайте (внизу справа)
         • Или отправьте письмо на support@example.com
         • Работаем ежедневно с 9:00 до 20:00 по МСК
+    file: "media/demo.md"
     buttons:
         -   text: Назад
             code: support.faq.intro
