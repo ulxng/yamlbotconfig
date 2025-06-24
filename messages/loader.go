@@ -10,7 +10,7 @@ type Loader struct {
 	data map[string]Message
 }
 
-func NewLoader(source string) *Loader {
+func NewLoader(source string) Loader {
 	data, err := os.ReadFile(source)
 	if err != nil {
 		panic(err)
@@ -21,7 +21,7 @@ func NewLoader(source string) *Loader {
 	if err != nil {
 		panic(err)
 	}
-	return &Loader{data: raw}
+	return Loader{data: raw}
 }
 
 func (l *Loader) GetByKey(key string) Message {

@@ -42,32 +42,17 @@ func run(opts options) error {
 	}
 
 	loader := messages.NewLoader("messages.yaml")
+	sender := messages.NewConfigurableSenderAdapter(loader)
+
 	bot.Handle(tele.OnCallback, func(c tele.Context) error {
 		key := c.Callback().Data
 		if key == "" {
 			return nil
 		}
-		msg := loader.GetByKey(key)
-		if msg.Text == "" {
-			return nil
-		}
-		markup := &tele.ReplyMarkup{}
-		for _, button := range msg.Buttons {
-			markup.InlineKeyboard = append(markup.InlineKeyboard, []tele.InlineButton{
-				{Text: button.Text, Data: button.Code},
-			})
-		}
-		return c.Edit(msg.Text, markup)
+		return sender.Edit(c, key)
 	})
 	bot.Handle("/start", func(c tele.Context) error {
-		message := loader.GetByKey("psy.faq.intro")
-		markup := &tele.ReplyMarkup{}
-		for _, button := range message.Buttons {
-			markup.InlineKeyboard = append(markup.InlineKeyboard, []tele.InlineButton{
-				{Text: button.Text, Data: button.Code},
-			})
-		}
-		return c.Send(message.Text, markup)
+		return sender.Send(c, "psy.faq.intro")
 	})
 
 	bot.Start()
