@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"ulxng/yamlbotconf/flow"
+	"ulxng/yamlbotconf/state"
 
 	tele "gopkg.in/telebot.v4"
 )
@@ -53,6 +54,9 @@ func (a *App) handleFlows() {
 	//todo нужен ли механизм автоматической инициализации флоу?
 	//или оставить это на ручное управление?
 	greetFlow := flow.NewFSM(flowLoader, "greeting")
+	greetFlow.SetStateCallback(state.Complete, func(session *state.Session, input any) error {
+		return nil
+	})
 
 	a.bot.Handle(tele.OnText, func(c tele.Context) error {
 		userID := c.Message().Sender.ID

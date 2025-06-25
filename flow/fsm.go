@@ -7,51 +7,67 @@ import (
 )
 
 type FSM struct {
-	flow Flow
+	flow      Flow
+	callbacks map[state.State]state.Callback
 }
 
 func NewFSM(loader *Loader, flowID string) *FSM {
 	flow := loader.Flows[flowID]
 	flow.InitialState = state.Initial // todo все флоу будут иметь одинаковый initial state
-	return &FSM{flow: flow}
+	return &FSM{flow: flow, callbacks: make(map[state.State]state.Callback)}
 }
 
 // todo важный концептуальный вопрос - в какой момент переключать стейт
 // какой стейт класть в сессию - последний или будущий?
-func (f FSM) HandleStep(session *state.Session, input any) (configurator.Message, error) {
+func (f *FSM) HandleStep(session *state.Session, input any) (configurator.Message, error) {
 	// сначала обработать данные последнего стейта
 	step := f.flow.Steps[session.State] // в сессии лежит последний стейт, а не будущий
 	if step.DataCode != "" {
 		//внимание! если key не задан - никакие данные на шаге сохраняться не будут
 		session.Data[step.DataCode] = input
 	}
-	if step.Callback != nil {
-		if err := step.Callback(session, input); err != nil {
-			return configurator.Message{}, fmt.Errorf("step.Callback: %w", err)
+	cb := f.GetStateCallback(session.State)
+	if cb != nil {
+		if err := cb(session, input); err != nil {
+			return configurator.Message{}, fmt.Errorf("callback: %w", err)
 		}
 	}
 	var message configurator.Message
 	//потом переключить стейт. На текущем шаге должно отправляться сообщение того стейта, на который переключаемся
+	//сообщение нужно отправлять от следующего шага
 	if step.NextState != nil {
 		message = f.flow.Steps[*step.NextState].Message
 		session.State = *step.NextState
 	}
-	//пока не было ответа на стейт - не переходить на следующий
-	//сообщение нужно отправлять от следующего шага
+	if session.State == state.Complete {
+		//хак для последнего шага. Тк до него выполнение больше не дойдет, выполняем сразу
+		cb := f.GetStateCallback(state.Complete)
+		if cb != nil {
+			if err := cb(session, input); err != nil {
+				return configurator.Message{}, fmt.Errorf("complete callback: %w", err)
+			}
+		}
+	}
 	return message, nil
 }
 
-func (f FSM) Supports(session *state.Session) bool {
+func (f *FSM) GetStateCallback(state state.State) state.Callback {
+	return f.callbacks[state]
+}
+
+func (f *FSM) Supports(session *state.Session) bool {
 	return session.FlowID == f.flow.ID
 }
 
-func (f FSM) Start(userID int64) *state.Session {
+func (f *FSM) Start(userID int64) *state.Session {
 	session := &state.Session{UserID: userID, State: f.flow.InitialState, Data: make(map[string]any), FlowID: f.flow.ID}
 	return session
 }
 
-func (f FSM) IsFinished(session *state.Session) bool {
+func (f *FSM) IsFinished(session *state.Session) bool {
 	return session.State == state.Complete
 }
 
-//todo метод для добавление хендлеров
+func (f *FSM) SetStateCallback(state state.State, callback state.Callback) {
+	f.callbacks[state] = callback
+}
