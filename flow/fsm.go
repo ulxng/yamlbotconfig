@@ -12,13 +12,17 @@ type FSM struct {
 
 func NewFSM(loader *Loader, flowID string) *FSM {
 	flow := loader.Flows[flowID]
-	flow.InitialState = state.StateIdle // todo
+	flow.InitialState = state.Initial // todo все флоу будут иметь одинаковый initial state
 	return &FSM{flow: flow}
 }
 
-func (f FSM) HandleStep(session *state.Session, input string) (configurator.Message, error) {
-	step := f.flow.Steps[session.State]
+// todo важный концептуальный вопрос - в какой момент переключать стейт
+// какой стейт класть в сессию - последний или будущий?
+func (f FSM) HandleStep(session *state.Session, input any) (configurator.Message, error) {
+	// сначала обработать данные последнего стейта
+	step := f.flow.Steps[session.State] // в сессии лежит последний стейт, а не будущий
 	if step.DataCode != "" {
+		//внимание! если key не задан - никакие данные на шаге сохраняться не будут
 		session.Data[step.DataCode] = input
 	}
 	if step.Callback != nil {
@@ -26,11 +30,15 @@ func (f FSM) HandleStep(session *state.Session, input string) (configurator.Mess
 			return configurator.Message{}, fmt.Errorf("step.Callback: %w", err)
 		}
 	}
+	var message configurator.Message
+	//потом переключить стейт. На текущем шаге должно отправляться сообщение того стейта, на который переключаемся
 	if step.NextState != nil {
-		//todo удалить из стора? или передать наружу флаг, который скажет, что надо удалить его?
+		message = f.flow.Steps[*step.NextState].Message
 		session.State = *step.NextState
 	}
-	return step.Message, nil
+	//пока не было ответа на стейт - не переходить на следующий
+	//сообщение нужно отправлять от следующего шага
+	return message, nil
 }
 
 func (f FSM) Supports(session *state.Session) bool {
@@ -38,8 +46,12 @@ func (f FSM) Supports(session *state.Session) bool {
 }
 
 func (f FSM) Start(userID int64) *state.Session {
-	session := &state.Session{UserID: userID, State: f.flow.InitialState, Data: make(map[string]string), FlowID: f.flow.ID}
+	session := &state.Session{UserID: userID, State: f.flow.InitialState, Data: make(map[string]any), FlowID: f.flow.ID}
 	return session
+}
+
+func (f FSM) IsFinished(session *state.Session) bool {
+	return session.State == state.Complete
 }
 
 //todo метод для добавление хендлеров
