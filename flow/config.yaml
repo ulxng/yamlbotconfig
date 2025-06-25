@@ -1,0 +1,31 @@
+#flow_id:
+#    id: flow_id
+#    steps:
+#        state_name:
+#            next: string
+#            code: string
+#            message:
+#                text: string
+
+
+greeting:
+    id: greeting
+    steps:
+        idle:
+            next: ask_name
+            message:
+                text: Добрый день! Ответьте на несколько вопросов
+        ask_name:
+            message:
+                text: Как вас зовут?
+            code: name
+            next: ask_email
+        ask_email:
+            message:
+                text: Ваш email
+            code: email
+            next: complete
+        complete:
+            message:
+                text: Спасибо за инфу!
+#            если нет next - это последний

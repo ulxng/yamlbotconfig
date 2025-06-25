@@ -7,6 +7,7 @@ import (
 type MessageSender interface {
 	Send(c tele.Context, key string) error
 	Edit(c tele.Context, key string) error
+	SendRaw(c tele.Context, message Message) error
 }
 
 // ConfigurableSenderAdapter ищет конфигурацию сообщения по ключу и готовит его к отправке.
@@ -25,6 +26,10 @@ func (b *ConfigurableSenderAdapter) Send(c tele.Context, messageKey string) erro
 		return nil
 	}
 
+	return b.SendRaw(c, msg)
+}
+
+func (b *ConfigurableSenderAdapter) SendRaw(c tele.Context, msg Message) error {
 	markup := &tele.ReplyMarkup{}
 	for _, button := range msg.Buttons {
 		markup.InlineKeyboard = append(markup.InlineKeyboard, []tele.InlineButton{

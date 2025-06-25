@@ -1,4 +1,4 @@
-package session
+package state
 
 type Store struct {
 	pool map[int64]*Session
@@ -19,8 +19,7 @@ func (s *Store) Delete(userID int64) {
 	s.pool[userID] = nil
 }
 
-func (s *Store) Create(userID int64, state State, flowID string) *Session {
-	session := &Session{UserID: userID, State: state, Data: make(map[State]string), FlowID: flowID}
+func (s *Store) Create(userID int64, session *Session) *Session {
 	s.pool[userID] = session
 	return session
 }
