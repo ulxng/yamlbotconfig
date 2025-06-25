@@ -7,11 +7,21 @@ import (
 	"time"
 	"ulxng/yamlbotconf/configurator"
 	"ulxng/yamlbotconf/email"
-	"ulxng/yamlbotconf/form/greeting"
+	"ulxng/yamlbotconf/flow"
+	"ulxng/yamlbotconf/state"
 
 	"github.com/jessevdk/go-flags"
 	tele "gopkg.in/telebot.v4"
 )
+
+type App struct {
+	bot    *tele.Bot
+	store  *state.Store
+	sender configurator.MessageSender
+	mailer *email.Mailer
+
+	flows []flow.Flow // todo
+}
 
 type options struct {
 	BotToken string `long:"token" env:"BOT_TOKEN" required:"true" description:"telegram bot token"`
@@ -28,14 +38,15 @@ func main() {
 
 	log.Println("bot started")
 
-	if err := run(opts); err != nil {
+	app := App{}
+	if err := app.run(opts); err != nil {
 		log.Printf("run: %s", err)
 	}
 
 	log.Println("bot stopped")
 }
 
-func run(opts options) error {
+func (a *App) run(opts options) error {
 	pref := tele.Settings{
 		Token:  opts.BotToken,
 		Poller: &tele.LongPoller{Timeout: time.Second},
@@ -44,45 +55,18 @@ func run(opts options) error {
 	if err != nil {
 		return fmt.Errorf("tele.NewBot: %w", err)
 	}
+	a.bot = bot
 
 	loader := configurator.NewLoader("responses")
-	sender := configurator.NewConfigurableSenderAdapter(loader)
-	greetingForm := greeting.NewForm(sender)
-	mailer := email.NewMailer(opts.SmtpConfig)
+	a.sender = configurator.NewConfigurableSenderAdapter(loader)
+	a.mailer = email.NewMailer(opts.SmtpConfig)
+	a.store = state.NewStore()
 
-	bot.Handle(tele.OnCallback, func(c tele.Context) error {
-		key := c.Callback().Data
-		if key == "" {
-			return nil
-		}
-		return sender.Edit(c, key)
-	})
-	bot.Handle("/send", func(c tele.Context) error {
-		m, err := c.Bot().Send(c.Recipient(), "Отправляю сообщение на email...")
-		if err != nil {
-			return fmt.Errorf("bot.Send: %w", err)
-		}
-		go func() {
-			if err := mailer.Send("Demo message", "Test"); err != nil {
-				log.Printf("Failed to send email: %v", err)
-				_, err := c.Bot().Edit(m, "Failed to send email")
-				if err != nil {
-					log.Printf("Failed to send message: %v", err)
-					return
-				}
-			}
-			_, err := c.Bot().Edit(m, "Заявка успешно отправлена")
-			if err != nil {
-				return
-			}
-		}()
-		return nil
-	})
-	bot.Handle("/start", func(c tele.Context) error {
-		return sender.Send(c, "main.menu")
-	}, greetingForm.CheckIsFormCompleted)
-	bot.Handle(tele.OnText, greetingForm.HandleStep, greetingForm.CheckIsFormCompleted)
+	a.handleButtons()
+	a.handleSendMailCommand()
+	a.handleFlows()
+	a.handleStart()
 
-	bot.Start()
+	a.bot.Start()
 	return nil
 }
