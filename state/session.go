@@ -5,6 +5,6 @@ package state
 type Session struct {
 	UserID int64
 	State  State
-	Data   map[string]string
+	Data   map[string]any
 	FlowID string
 }

@@ -50,11 +50,13 @@ func (a *App) handleSendMailCommand() {
 
 func (a *App) handleFlows() {
 	flowLoader := flow.NewLoader("flow")
+	//todo нужен ли механизм автоматической инициализации флоу?
+	//или оставить это на ручное управление?
 	greetFlow := flow.NewFSM(flowLoader, "greeting")
 
 	a.bot.Handle(tele.OnText, func(c tele.Context) error {
 		userID := c.Message().Sender.ID
-		session := a.store.Get(userID)
+		session := a.store.Get(userID) // todo это может быть общая часть, а вот инициализация - нет. Ее в любом случае надо писать вручную
 		if session == nil {
 			session = greetFlow.Start(userID)
 			a.store.Create(userID, session)
@@ -68,7 +70,7 @@ func (a *App) handleFlows() {
 		if err != nil {
 			return fmt.Errorf("greetFlow.HandleStep: %w", err)
 		}
-		if message.Text == "" {
+		if greetFlow.IsFinished(session) {
 			a.store.Delete(userID)
 		}
 		return a.sender.SendRaw(c, message)
