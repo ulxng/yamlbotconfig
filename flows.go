@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"ulxng/yamlbotconf/model"
 	"ulxng/yamlbotconf/state"
 
 	tele "gopkg.in/telebot.v4"
@@ -12,13 +13,17 @@ func (a *App) registerFlows() {
 	greetFlow := a.flowRegistry.CreateFlow("greeting")
 	greetFlow.SetStateCallback(state.Complete, a.greetFlowCompletedCallback)
 	greetFlow.InitConditionFunc = func(c tele.Context) bool {
-		return false
+		userID := c.Sender().ID
+		user, err := a.userRepository.Find(userID)
+		if err != nil {
+			return false
+		}
+		return user == nil
 	}
 
 }
 
 func (a *App) greetFlowCompletedCallback(session *state.Session, input any) error {
-	//todo сохранть user в бд
 	notification := fmt.Sprintf("%s %d\n", "userID", session.UserID)
 	for k, v := range session.Data {
 		switch v.(type) {
@@ -27,6 +32,9 @@ func (a *App) greetFlowCompletedCallback(session *state.Session, input any) erro
 		case *tele.Contact:
 			notification += fmt.Sprintf("%s %s\n", k, v.(*tele.Contact).PhoneNumber)
 		}
+	}
+	if err := a.userRepository.CreateUser(model.User{ID: session.UserID}); err != nil {
+		return fmt.Errorf("createUser: %w", err)
 	}
 	go func() {
 		if err := a.mailer.Send(notification, "Анкета"); err != nil {
