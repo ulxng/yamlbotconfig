@@ -30,7 +30,13 @@ func (a *App) FindFSM() tele.MiddlewareFunc {
 			c.Set("session", session)
 			c.Set("step", step)
 			//передать управление на этот flow
-			return a.bot.Trigger(step.Action, c)
+			var action flow.Action
+			if step.Action == "" {
+				action = flow.SendMessage
+			} else {
+				action = step.Action
+			}
+			return a.bot.Trigger(action, c)
 		}
 	}
 }

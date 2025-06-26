@@ -6,13 +6,12 @@
 #            code: string
 #            message:
 #                text: string
-#       action: string (required)
+#       action: string (default: send_message)
 
 support:
     id: support
     steps:
         idle:
-            action: send_message # а на idle точно нужен action?
             next: ask_category
         ask_category:
             message:
@@ -23,13 +22,13 @@ support:
                     -   text: Доступы
             code: category
             next: ask_message
-            action: collect_answer
+            action: collect_text
         ask_message:
             message:
                 text: Опишите проблему
             code: message
             next: complete
-            action: collect_answer
+            action: collect_text
         complete:
             message:
                 text: |
@@ -43,7 +42,6 @@ greeting:
         #        нужно добавлять этот фиктивный первый шаг. Иначе переключение будет работать некорректно
         idle:
             next: greet
-            action: send_message
         greet:
             message:
                 text: |
@@ -54,13 +52,13 @@ greeting:
                         request_contact: true
             code: phone
             next: ask_name
-            action: handle_phone
+            action: collect_contact
         ask_name: # что означает переход на стейт? на нем отправляется сообщение. Но данные нужно собирать с предыдущего степа
             message:
                 text: Как вас зовут?
             code: name
             next: ask_status
-            action: send_message
+            action: collect_text
         ask_status:
             message:
                 text: Ваш статус?
@@ -70,13 +68,13 @@ greeting:
                     -   text: Послезавтра
             code: status
             next: ask_email
-            action: collect_answer
+            action: collect_text
         ask_email:
             message:
                 text: Ваш email
             code: email
             next: complete
-            action: collect_answer
+            action: collect_text
         complete:
             message:
                 text: '🆗 Ваши ответы помогут мне предоставить вам наиболее релевантную информацию и поддержку. Спасибо, что делитесь с нами! 💖'
