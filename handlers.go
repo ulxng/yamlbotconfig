@@ -96,3 +96,16 @@ func (a *App) onSupportRequestCompete(c tele.Context) error {
 	}()
 	return nil
 }
+
+func (a *App) onHelpRequestCompete(c tele.Context) error {
+	if c.Get("session") == nil {
+		return nil
+	}
+	session := c.Get("session").(*state.Session)
+	go func() {
+		if err := a.mailer.Send(fmt.Sprintf("%v", session.Data), "Заявка на помощь"); err != nil {
+			log.Printf("Failed to send email: %v", err)
+		}
+	}()
+	return nil
+}
