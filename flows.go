@@ -11,7 +11,7 @@ import (
 func (a *App) registerFlows() {
 	greetFlow := a.flowRegistry.CreateFlow("greeting")
 	greetFlow.SetStateCallback(state.Complete, a.greetFlowCompletedCallback)
-	greetFlow.CheckInitCondition = func(c tele.Context) bool {
+	greetFlow.InitConditionFunc = func(c tele.Context) bool {
 		return false
 	}
 

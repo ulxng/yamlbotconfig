@@ -34,7 +34,7 @@ func (r *Registry) FindUserActiveFlow(session *state.Session) *FSM {
 
 func (r *Registry) FindFlowToStart(c tele.Context) *FSM {
 	for _, fsm := range r.flows {
-		if fsm.CheckInitCondition(c) {
+		if fsm.InitConditionFunc(c) {
 			return fsm
 		}
 	}

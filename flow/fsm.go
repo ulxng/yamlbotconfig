@@ -9,9 +9,9 @@ import (
 )
 
 type FSM struct {
-	flow               Flow
-	callbacks          map[state.State]state.Callback
-	CheckInitCondition func(c tele.Context) bool
+	flow              Flow
+	callbacks         map[state.State]state.Callback
+	InitConditionFunc func(c tele.Context) bool
 }
 
 func NewFSM(loader *Loader, flowID string) *FSM {
