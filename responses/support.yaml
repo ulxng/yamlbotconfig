@@ -18,6 +18,8 @@ support.faq.contact:
         • Работаем ежедневно с 9:00 до 20:00 по МСК
     file: "media/demo.md"
     buttons:
+        -   text: Оставить заявку
+            code: support.request
         -   text: Назад
             code: support.faq.intro
 

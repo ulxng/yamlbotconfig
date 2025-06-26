@@ -11,4 +11,5 @@ type Step struct {
 	NextState *state.State         `yaml:"next"`
 	Message   configurator.Message `yaml:"message"`
 	DataCode  string               `yaml:"code"` // key для сохранения данных
+	Action    string               `yaml:"action"`
 }

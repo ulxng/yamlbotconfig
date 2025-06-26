@@ -7,6 +7,21 @@
 #            message:
 #                text: string
 
+support:
+    id: support
+    steps:
+        idle:
+            next: ask_message
+            action: send_message
+        ask_message:
+            message:
+                text: Напишите текст заявки
+            code: message
+            next: complete
+            action: collect_answer
+        complete:
+            message:
+                text: Заявка отправлена
 
 greeting:
     id: greeting
@@ -14,6 +29,7 @@ greeting:
         #        нужно добавлять этот фиктивный первый шаг. Иначе переключение будет работать некорректно
         idle:
             next: greet
+            action: send_message
         greet:
             message:
                 text: |
@@ -24,11 +40,13 @@ greeting:
                         request_contact: true
             code: phone
             next: ask_name
+            action: handle_phone
         ask_name: # что означает переход на стейт? на нем отправляется сообщение. Но данные нужно собирать с предыдущего степа
             message:
                 text: Как вас зовут?
             code: name
             next: ask_status
+            action: send_message
         ask_status:
             message:
                 text: Ваш статус?
@@ -38,11 +56,13 @@ greeting:
                     -   text: Послезавтра
             code: status
             next: ask_email
+            action: send_message
         ask_email:
             message:
                 text: Ваш email
             code: email
             next: complete
+            action: send_message
         complete:
             message:
                 text: '🆗 Ваши ответы помогут мне предоставить вам наиболее релевантную информацию и поддержку. Спасибо, что делитесь с нами! 💖'

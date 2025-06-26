@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"ulxng/yamlbotconf/flow"
 
 	tele "gopkg.in/telebot.v4"
@@ -10,7 +9,7 @@ import (
 func (a *App) FindFSM() tele.MiddlewareFunc {
 	return func(next tele.HandlerFunc) tele.HandlerFunc {
 		return func(c tele.Context) error {
-			userID := c.Message().Sender.ID
+			userID := c.Message().Chat.ID
 			session := a.store.Get(userID)
 			var fsm *flow.FSM
 			if session != nil {
@@ -26,45 +25,12 @@ func (a *App) FindFSM() tele.MiddlewareFunc {
 				return next(c)
 			}
 
+			step := fsm.GetCurrentStep(session)
 			c.Set("fsm", fsm)
 			c.Set("session", session)
+			c.Set("step", step)
 			//передать управление на этот flow
-			return next(c)
+			return a.bot.Trigger(step.Action, c)
 		}
-	}
-}
-
-func (a *App) startFlow(next tele.HandlerFunc) tele.HandlerFunc {
-	return func(c tele.Context) error {
-		if err := a.handleFlow(c, nil); err != nil {
-			if errors.Is(err, ErrFlowNotFound) {
-				return next(c)
-			}
-		}
-		return nil
-	}
-}
-
-func (a *App) handleTextFlow(next tele.HandlerFunc) tele.HandlerFunc {
-	return func(c tele.Context) error {
-		input := c.Message().Text
-		if err := a.handleFlow(c, input); err != nil {
-			if errors.Is(err, ErrFlowNotFound) {
-				return next(c)
-			}
-		}
-		return nil
-	}
-}
-
-func (a *App) handleContactFlow(next tele.HandlerFunc) tele.HandlerFunc {
-	return func(c tele.Context) error {
-		input := c.Message().Contact
-		if err := a.handleFlow(c, input); err != nil {
-			if errors.Is(err, ErrFlowNotFound) {
-				return next(c)
-			}
-		}
-		return nil
 	}
 }

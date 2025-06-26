@@ -11,6 +11,7 @@ import (
 
 func (a *App) registerFlows() {
 	greetFlow := a.flowRegistry.CreateFlow("greeting")
+	//todo remove. Use action callbacks instead
 	greetFlow.SetStateCallback(state.Complete, a.greetFlowCompletedCallback)
 	greetFlow.InitConditionFunc = func(c tele.Context) bool {
 		userID := c.Sender().ID
@@ -19,6 +20,11 @@ func (a *App) registerFlows() {
 			return false
 		}
 		return user == nil
+	}
+
+	supportFlow := a.flowRegistry.CreateFlow("support")
+	supportFlow.InitConditionFunc = func(c tele.Context) bool {
+		return c.Callback() != nil && c.Callback().Data == "support.request"
 	}
 
 }
