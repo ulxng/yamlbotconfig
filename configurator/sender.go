@@ -23,7 +23,7 @@ func NewConfigurableSenderAdapter(loader *Loader) *ConfigurableSenderAdapter {
 func (b *ConfigurableSenderAdapter) Send(c tele.Context, messageKey string) error {
 	msg := b.loader.GetByKey(messageKey)
 	if msg.Text == "" {
-		return nil
+		return ErrMessageNotFound
 	}
 
 	return b.SendRaw(c, msg)
@@ -61,7 +61,7 @@ func (b *ConfigurableSenderAdapter) SendRaw(c tele.Context, msg Message) error {
 func (b *ConfigurableSenderAdapter) Edit(c tele.Context, messageKey string) error {
 	msg := b.loader.GetByKey(messageKey)
 	if msg.Text == "" {
-		return nil
+		return ErrMessageNotFound
 	}
 
 	markup := &tele.ReplyMarkup{}
