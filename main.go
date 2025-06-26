@@ -20,7 +20,7 @@ type App struct {
 	sender configurator.MessageSender
 	mailer *email.Mailer
 
-	flows []flow.Flow // todo
+	flowRegistry *flow.Registry
 }
 
 type options struct {
@@ -62,6 +62,9 @@ func (a *App) run(opts options) error {
 	a.mailer = email.NewMailer(opts.SmtpConfig)
 	a.store = state.NewStore()
 
+	flowLoader := flow.NewLoader("flow")
+	a.flowRegistry = flow.NewRegistry(flowLoader)
+
 	a.handleButtons()
 	a.handleSendMailCommand()
 	a.handleFlows()
@@ -69,4 +72,31 @@ func (a *App) run(opts options) error {
 
 	a.bot.Start()
 	return nil
+}
+
+func (a *App) FindFSM() tele.MiddlewareFunc {
+	return func(next tele.HandlerFunc) tele.HandlerFunc {
+		return func(c tele.Context) error {
+			userID := c.Message().Sender.ID
+			session := a.store.Get(userID)
+			var fsm *flow.FSM
+			if session != nil {
+				fsm = a.flowRegistry.FindUserActiveFlow(session)
+			} else {
+				fsm = a.flowRegistry.FindFlowToStart(c) // todo rename
+				if fsm != nil {
+					session = fsm.Start(userID)
+					a.store.Save(userID, session)
+				}
+			}
+			if fsm == nil {
+				return nil
+			}
+
+			c.Set("fsm", fsm)
+			c.Set("session", session)
+			//передать управление на этот flow
+			return next(c)
+		}
+	}
 }
