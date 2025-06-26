@@ -9,6 +9,7 @@ import (
 	"ulxng/yamlbotconf/email"
 	"ulxng/yamlbotconf/flow"
 	"ulxng/yamlbotconf/state"
+	"ulxng/yamlbotconf/storage"
 
 	"github.com/jessevdk/go-flags"
 	tele "gopkg.in/telebot.v4"
@@ -21,6 +22,8 @@ type App struct {
 	mailer *email.Mailer
 
 	flowRegistry *flow.Registry
+
+	userRepository storage.UserRepository
 }
 
 type options struct {
@@ -61,6 +64,7 @@ func (a *App) run(opts options) error {
 	a.sender = configurator.NewConfigurableSenderAdapter(loader)
 	a.mailer = email.NewMailer(opts.SmtpConfig)
 	a.store = state.NewStore()
+	a.userRepository = storage.NewUserMemoryStorage()
 
 	flowLoader := flow.NewLoader("flow")
 	a.flowRegistry = flow.NewRegistry(flowLoader)
