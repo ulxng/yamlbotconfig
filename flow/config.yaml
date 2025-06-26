@@ -6,22 +6,36 @@
 #            code: string
 #            message:
 #                text: string
+#       action: string (required)
 
 support:
     id: support
     steps:
         idle:
+            action: send_message # а на idle точно нужен action?
+            next: ask_category
+        ask_category:
+            message:
+                text: Выберите категорию
+                answers:
+                    -   text: Биллинг
+                    -   text: Настройка сервера
+                    -   text: Доступы
+            code: category
             next: ask_message
-            action: send_message
+            action: collect_answer
         ask_message:
             message:
-                text: Напишите текст заявки
+                text: Опишите проблему
             code: message
             next: complete
             action: collect_answer
         complete:
             message:
-                text: Заявка отправлена
+                text: |
+                    Заявка отправлена. 
+                    Ожидайте ответа на почту
+            action: send_support_request
 
 greeting:
     id: greeting
@@ -56,14 +70,15 @@ greeting:
                     -   text: Послезавтра
             code: status
             next: ask_email
-            action: send_message
+            action: collect_answer
         ask_email:
             message:
                 text: Ваш email
             code: email
             next: complete
-            action: send_message
+            action: collect_answer
         complete:
             message:
                 text: '🆗 Ваши ответы помогут мне предоставить вам наиболее релевантную информацию и поддержку. Спасибо, что делитесь с нами! 💖'
-#            если нет next - это последний. На нем никаких code быть не должно - это закрывающее сообщение, от пользователя после него не ожидается никакого ввода
+            #            если нет next - это последний. На нем никаких code быть не должно - это закрывающее сообщение, от пользователя после него не ожидается никакого ввода
+            action: send_onboard_form  # выполняется после отправки message. Такой порядок только для complete
