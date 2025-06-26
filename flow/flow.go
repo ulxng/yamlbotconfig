@@ -1,6 +1,6 @@
 package flow
 
-import "ulxng/yamlbotconf/state"
+import "ulxng/blueprintbot/state"
 
 // эта сущность должна быть в единственном экземпляре
 // инстанциируется единожды

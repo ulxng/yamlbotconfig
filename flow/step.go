@@ -1,8 +1,8 @@
 package flow
 
 import (
-	"ulxng/yamlbotconf/configurator"
-	"ulxng/yamlbotconf/state"
+	"ulxng/blueprintbot/configurator"
+	"ulxng/blueprintbot/state"
 )
 
 // это просто носитель конфигурации. Иммутабельно

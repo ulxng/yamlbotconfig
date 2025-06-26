@@ -2,7 +2,7 @@ package main
 
 import (
 	"strings"
-	"ulxng/yamlbotconf/flow"
+	"ulxng/blueprintbot/flow"
 
 	tele "gopkg.in/telebot.v4"
 )

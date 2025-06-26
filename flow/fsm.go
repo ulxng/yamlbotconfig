@@ -2,7 +2,7 @@ package flow
 
 import (
 	"errors"
-	"ulxng/yamlbotconf/state"
+	"ulxng/blueprintbot/state"
 
 	tele "gopkg.in/telebot.v4"
 )

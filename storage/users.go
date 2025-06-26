@@ -1,6 +1,6 @@
 package storage
 
-import "ulxng/yamlbotconf/model"
+import "ulxng/blueprintbot/model"
 
 type UserMemoryStorage struct {
 	data map[int64]*model.User

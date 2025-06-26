@@ -1,6 +1,6 @@
 package storage
 
-import "ulxng/yamlbotconf/model"
+import "ulxng/blueprintbot/model"
 
 type UserRepository interface {
 	Find(userID int64) (*model.User, error)

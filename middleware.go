@@ -1,7 +1,7 @@
 package main
 
 import (
-	"ulxng/yamlbotconf/flow"
+	"ulxng/blueprintbot/flow"
 
 	tele "gopkg.in/telebot.v4"
 )

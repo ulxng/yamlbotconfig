@@ -28,8 +28,8 @@
 
 ```bash
 # Клонируем проект
-git clone <repo-url>
-cd yamlconf
+git clone https://github.com/ulxng/blueprintbot
+cd blueprintbot
 
 # Устанавливаем зависимости
 go mod download

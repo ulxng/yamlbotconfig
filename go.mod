@@ -1,4 +1,4 @@
-module ulxng/yamlbotconf
+module ulxng/blueprintbot
 
 go 1.24.3
 

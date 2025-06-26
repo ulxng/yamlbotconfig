@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
-	"ulxng/yamlbotconf/flow"
-	"ulxng/yamlbotconf/model"
-	"ulxng/yamlbotconf/state"
+	"ulxng/blueprintbot/flow"
+	"ulxng/blueprintbot/model"
+	"ulxng/blueprintbot/state"
 
 	tele "gopkg.in/telebot.v4"
 )
