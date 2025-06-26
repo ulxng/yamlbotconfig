@@ -5,10 +5,11 @@ import (
 )
 
 func (a *App) registerRoutes() {
-	a.bot.Use(a.FindFSM())
+	flowGroup := a.bot.Group()
+	flowGroup.Use(a.FindFSM())
 
-	a.bot.Handle("/start", a.defaultStartHandler, a.startFlow)
+	flowGroup.Handle("/start", a.defaultStartHandler, a.startFlow)
+	flowGroup.Handle(tele.OnText, a.handleError, a.handleTextFlow)
+	flowGroup.Handle(tele.OnContact, a.handleError, a.handleContactFlow)
 	a.bot.Handle(tele.OnCallback, a.handleButton)
-	a.bot.Handle(tele.OnText, a.handleError, a.handleTextFlow)
-	a.bot.Handle(tele.OnContact, a.handleError, a.handleContactFlow)
 }
