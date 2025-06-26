@@ -50,10 +50,23 @@ func (a *App) handleSendMailCommand() {
 }
 
 func (a *App) handleFlows() {
-	flowLoader := flow.NewLoader("flow")
-	//todo нужен ли механизм автоматической инициализации флоу?
-	//или оставить это на ручное управление?
-	greetFlow := flow.NewFSM(flowLoader, "greeting")
+	flowGroup := a.bot.Group()
+	flowGroup.Use(a.FindFSM())
+
+	flowGroup.Handle(tele.OnContact, func(c tele.Context) error {
+		input := c.Message().Contact
+		return a.handleFlow(c, input)
+	})
+
+	flowGroup.Handle(tele.OnText, func(c tele.Context) error {
+		input := c.Message().Text
+		return a.handleFlow(c, input)
+	})
+
+	greetFlow := a.flowRegistry.CreateFlow("greeting")
+	greetFlow.CheckInitCondition = func(c tele.Context) bool {
+		return true
+	}
 	greetFlow.SetStateCallback(state.Complete, func(session *state.Session, input any) error {
 		//todo сохранть user в бд
 		notification := fmt.Sprintf("%s %d\n", "userID", session.UserID)
@@ -72,50 +85,21 @@ func (a *App) handleFlows() {
 		}()
 		return nil
 	})
-	a.bot.Handle(tele.OnContact, func(c tele.Context) error {
-		//todo refactor - flow search
-		userID := c.Message().Sender.ID
-		session := a.store.Get(userID)
-		if session == nil {
-			session = greetFlow.Start(userID)
-			a.store.Create(userID, session)
-		}
-		if !greetFlow.Supports(session) {
-			return nil
-		}
-		input := c.Message().Contact
 
-		message, err := greetFlow.HandleStep(session, input)
-		if err != nil {
-			return fmt.Errorf("greetFlow.HandleStep: %w", err)
-		}
-		if greetFlow.IsFinished(session) {
-			a.store.Delete(userID)
-		}
-		return a.sender.SendRaw(c, message)
-	})
+}
 
-	a.bot.Handle(tele.OnText, func(c tele.Context) error {
-		userID := c.Message().Sender.ID
-		session := a.store.Get(userID) // todo это может быть общая часть, а вот инициализация флоу - нет. Ее в любом случае надо писать вручную
-		//todo вынести в общую часть - метод должен возврщать соответсвующий flow
-		//для поиска flow должен быть registry c flowID (map). цепочка с supports тоже пойдет, но не очень
-		if session == nil {
-			session = greetFlow.Start(userID)
-			a.store.Create(userID, session)
-		}
-		if !greetFlow.Supports(session) {
-			return nil
-		}
-		input := c.Message().Text
-
-		message, err := greetFlow.HandleStep(session, input)
-		if err != nil {
-			return fmt.Errorf("greetFlow.HandleStep: %w", err)
-		}
-		if greetFlow.IsFinished(session) {
-			a.store.Delete(userID)
-		}
-		return a.sender.SendRaw(c, message)
-	})
+func (a *App) handleFlow(c tele.Context, input any) error {
+	fsm := c.Get("fsm").(*flow.FSM)
+	if fsm == nil {
+		return nil
+	}
+	session := c.Get("session").(*state.Session)
+	message, err := fsm.HandleStep(session, input)
+	if err != nil {
+		return fmt.Errorf("fsm.HandleStep: %w", err)
+	}
+	if fsm.IsFinished(session) {
+		a.store.Delete(session)
+	}
+	return a.sender.SendRaw(c, message)
 }

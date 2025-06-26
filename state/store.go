@@ -15,11 +15,11 @@ func (s *Store) Get(userID int64) *Session {
 	return nil
 }
 
-func (s *Store) Delete(userID int64) {
-	s.pool[userID] = nil
+func (s *Store) Delete(session *Session) {
+	s.pool[session.UserID] = nil
 }
 
-func (s *Store) Create(userID int64, session *Session) *Session {
+func (s *Store) Save(userID int64, session *Session) *Session {
 	s.pool[userID] = session
 	return session
 }

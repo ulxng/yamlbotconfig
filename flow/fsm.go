@@ -4,11 +4,14 @@ import (
 	"fmt"
 	"ulxng/yamlbotconf/configurator"
 	"ulxng/yamlbotconf/state"
+
+	tele "gopkg.in/telebot.v4"
 )
 
 type FSM struct {
-	flow      Flow
-	callbacks map[state.State]state.Callback
+	flow               Flow
+	callbacks          map[state.State]state.Callback
+	CheckInitCondition func(c tele.Context) bool
 }
 
 func NewFSM(loader *Loader, flowID string) *FSM {
@@ -17,8 +20,6 @@ func NewFSM(loader *Loader, flowID string) *FSM {
 	return &FSM{flow: flow, callbacks: make(map[state.State]state.Callback)}
 }
 
-// todo важный концептуальный вопрос - в какой момент переключать стейт
-// какой стейт класть в сессию - последний или будущий?
 func (f *FSM) HandleStep(session *state.Session, input any) (configurator.Message, error) {
 	// сначала обработать данные последнего стейта
 	step := f.flow.Steps[session.State] // в сессии лежит последний стейт, а не будущий
