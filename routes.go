@@ -1,6 +1,8 @@
 package main
 
 import (
+	"ulxng/yamlbotconf/flow"
+
 	tele "gopkg.in/telebot.v4"
 )
 
@@ -14,14 +16,14 @@ func (a *App) registerRoutes() {
 	flowGroup.Handle(tele.OnText, a.handleError)
 
 	//такие эндпоинты - без flow middleware
-	a.bot.Handle("send_message", func(c tele.Context) error {
+	a.bot.Handle(flow.SendMessage, func(c tele.Context) error {
 		return a.handleFlow(c, nil)
 	})
-	a.bot.Handle("collect_answer", func(c tele.Context) error {
+	a.bot.Handle(flow.CollectText, func(c tele.Context) error {
 		input := c.Message().Text
 		return a.handleFlow(c, input)
 	})
-	a.bot.Handle("handle_phone", func(c tele.Context) error {
+	a.bot.Handle(flow.CollectContact, func(c tele.Context) error {
 		input := c.Message().Contact
 		return a.handleFlow(c, input)
 	})
