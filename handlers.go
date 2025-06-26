@@ -8,7 +8,7 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-func (a *App) defaultStartHandler(c tele.Context) error {
+func (a *App) menuHandler(c tele.Context) error {
 	return a.sender.Send(c, "main.menu")
 }
 
@@ -30,12 +30,12 @@ func (a *App) handleFlow(c tele.Context, input any) error {
 	}
 	fsm := c.Get("fsm").(*flow.FSM)
 	session := c.Get("session").(*state.Session)
-	message, err := fsm.HandleStep(session, input)
+	step, err := fsm.HandleStep(session, input)
 	if err != nil {
 		return fmt.Errorf("fsm.HandleStep: %w", err)
 	}
 	if fsm.IsFinished(session) {
 		a.store.Delete(session)
 	}
-	return a.sender.SendRaw(c, message)
+	return a.sender.SendRaw(c, step.Message)
 }

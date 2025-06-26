@@ -2,7 +2,6 @@ package flow
 
 import (
 	"fmt"
-	"ulxng/yamlbotconf/configurator"
 	"ulxng/yamlbotconf/state"
 
 	tele "gopkg.in/telebot.v4"
@@ -20,7 +19,7 @@ func NewFSM(loader *Loader, flowID string) *FSM {
 	return &FSM{flow: flow, callbacks: make(map[state.State]state.Callback)}
 }
 
-func (f *FSM) HandleStep(session *state.Session, input any) (configurator.Message, error) {
+func (f *FSM) HandleStep(session *state.Session, input any) (*Step, error) {
 	// сначала обработать данные последнего стейта
 	step := f.flow.Steps[session.State] // в сессии лежит последний стейт, а не будущий
 	if step.DataCode != "" {
@@ -30,14 +29,14 @@ func (f *FSM) HandleStep(session *state.Session, input any) (configurator.Messag
 	cb := f.GetStateCallback(session.State)
 	if cb != nil {
 		if err := cb(session, input); err != nil {
-			return configurator.Message{}, fmt.Errorf("callback: %w", err)
+			return nil, fmt.Errorf("callback: %w", err)
 		}
 	}
-	var message configurator.Message
+	var s Step
 	//потом переключить стейт. На текущем шаге должно отправляться сообщение того стейта, на который переключаемся
 	//сообщение нужно отправлять от следующего шага
 	if step.NextState != nil {
-		message = f.flow.Steps[*step.NextState].Message
+		s = f.flow.Steps[*step.NextState]
 		session.State = *step.NextState
 	}
 	if session.State == state.Complete {
@@ -45,11 +44,15 @@ func (f *FSM) HandleStep(session *state.Session, input any) (configurator.Messag
 		cb := f.GetStateCallback(state.Complete)
 		if cb != nil {
 			if err := cb(session, input); err != nil {
-				return configurator.Message{}, fmt.Errorf("complete callback: %w", err)
+				return nil, fmt.Errorf("complete callback: %w", err)
 			}
 		}
 	}
-	return message, nil
+	return &s, nil
+}
+
+func (f *FSM) GetCurrentStep(session *state.Session) Step {
+	return f.flow.Steps[session.State]
 }
 
 func (f *FSM) GetStateCallback(state state.State) state.Callback {
