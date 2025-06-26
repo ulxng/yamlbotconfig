@@ -1,7 +1,6 @@
 package flow
 
 import (
-	"fmt"
 	"ulxng/yamlbotconf/state"
 
 	tele "gopkg.in/telebot.v4"
@@ -9,14 +8,13 @@ import (
 
 type FSM struct {
 	flow              Flow
-	callbacks         map[state.State]state.Callback
 	InitConditionFunc func(c tele.Context) bool
 }
 
 func NewFSM(loader *Loader, flowID string) *FSM {
 	flow := loader.Flows[flowID]
 	flow.InitialState = state.Initial // todo все флоу будут иметь одинаковый initial state
-	return &FSM{flow: flow, callbacks: make(map[state.State]state.Callback)}
+	return &FSM{flow: flow}
 }
 
 func (f *FSM) HandleStep(session *state.Session, input any) (*Step, error) {
@@ -26,12 +24,6 @@ func (f *FSM) HandleStep(session *state.Session, input any) (*Step, error) {
 		//внимание! если key не задан - никакие данные на шаге сохраняться не будут
 		session.Data[step.DataCode] = input
 	}
-	cb := f.GetStateCallback(session.State)
-	if cb != nil {
-		if err := cb(session, input); err != nil {
-			return nil, fmt.Errorf("callback: %w", err)
-		}
-	}
 	var s Step
 	//потом переключить стейт. На текущем шаге должно отправляться сообщение того стейта, на который переключаемся
 	//сообщение нужно отправлять от следующего шага
@@ -39,24 +31,11 @@ func (f *FSM) HandleStep(session *state.Session, input any) (*Step, error) {
 		s = f.flow.Steps[*step.NextState]
 		session.State = *step.NextState
 	}
-	if session.State == state.Complete {
-		//хак для последнего шага. Тк до него выполнение больше не дойдет, выполняем сразу
-		cb := f.GetStateCallback(state.Complete)
-		if cb != nil {
-			if err := cb(session, input); err != nil {
-				return nil, fmt.Errorf("complete callback: %w", err)
-			}
-		}
-	}
 	return &s, nil
 }
 
 func (f *FSM) GetCurrentStep(session *state.Session) Step {
 	return f.flow.Steps[session.State]
-}
-
-func (f *FSM) GetStateCallback(state state.State) state.Callback {
-	return f.callbacks[state]
 }
 
 func (f *FSM) Supports(session *state.Session) bool {
@@ -70,8 +49,4 @@ func (f *FSM) Start(userID int64) *state.Session {
 
 func (f *FSM) IsFinished(session *state.Session) bool {
 	return session.State == state.Complete
-}
-
-func (f *FSM) SetStateCallback(state state.State, callback state.Callback) {
-	f.callbacks[state] = callback
 }

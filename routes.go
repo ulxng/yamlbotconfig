@@ -25,7 +25,23 @@ func (a *App) registerRoutes() {
 		input := c.Message().Contact
 		return a.handleFlow(c, input)
 	})
-	a.bot.Handle("send_support_request", func(c tele.Context) error {
-		return c.Send("blabla")
-	})
+	a.bot.Handle("send_onboard_form", a.onOnboardFormComplete)
+	a.bot.Handle("send_support_request", a.onSupportRequestCompete)
+}
+
+func (a *App) registerFlows() {
+	greetFlow := a.flowRegistry.CreateFlow("greeting")
+	greetFlow.InitConditionFunc = func(c tele.Context) bool {
+		userID := c.Sender().ID
+		user, err := a.userRepository.Find(userID)
+		if err != nil {
+			return false
+		}
+		return user == nil
+	}
+
+	supportFlow := a.flowRegistry.CreateFlow("support")
+	supportFlow.InitConditionFunc = func(c tele.Context) bool {
+		return c.Callback() != nil && c.Callback().Data == "support.request"
+	}
 }
