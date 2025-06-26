@@ -55,12 +55,51 @@ func (a *App) handleFlows() {
 	//или оставить это на ручное управление?
 	greetFlow := flow.NewFSM(flowLoader, "greeting")
 	greetFlow.SetStateCallback(state.Complete, func(session *state.Session, input any) error {
+		//todo сохранть user в бд
+		notification := fmt.Sprintf("%s %d\n", "userID", session.UserID)
+		for k, v := range session.Data {
+			switch v.(type) {
+			case string:
+				notification += fmt.Sprintf("%s %s\n", k, v)
+			case *tele.Contact:
+				notification += fmt.Sprintf("%s %s\n", k, v.(*tele.Contact).PhoneNumber)
+			}
+		}
+		go func() {
+			if err := a.mailer.Send(notification, "Анкета"); err != nil {
+				log.Printf("Failed to send email: %v", err)
+			}
+		}()
 		return nil
+	})
+	a.bot.Handle(tele.OnContact, func(c tele.Context) error {
+		//todo refactor - flow search
+		userID := c.Message().Sender.ID
+		session := a.store.Get(userID)
+		if session == nil {
+			session = greetFlow.Start(userID)
+			a.store.Create(userID, session)
+		}
+		if !greetFlow.Supports(session) {
+			return nil
+		}
+		input := c.Message().Contact
+
+		message, err := greetFlow.HandleStep(session, input)
+		if err != nil {
+			return fmt.Errorf("greetFlow.HandleStep: %w", err)
+		}
+		if greetFlow.IsFinished(session) {
+			a.store.Delete(userID)
+		}
+		return a.sender.SendRaw(c, message)
 	})
 
 	a.bot.Handle(tele.OnText, func(c tele.Context) error {
 		userID := c.Message().Sender.ID
-		session := a.store.Get(userID) // todo это может быть общая часть, а вот инициализация - нет. Ее в любом случае надо писать вручную
+		session := a.store.Get(userID) // todo это может быть общая часть, а вот инициализация флоу - нет. Ее в любом случае надо писать вручную
+		//todo вынести в общую часть - метод должен возврщать соответсвующий flow
+		//для поиска flow должен быть registry c flowID (map). цепочка с supports тоже пойдет, но не очень
 		if session == nil {
 			session = greetFlow.Start(userID)
 			a.store.Create(userID, session)
