@@ -51,7 +51,7 @@ func (b *ConfigurableSenderAdapter) SendRaw(c tele.Context, msg Message) error {
 		markup.OneTimeKeyboard = true
 		for _, button := range msg.Answers {
 			markup.ReplyKeyboard = append(markup.ReplyKeyboard, []tele.ReplyButton{
-				{Text: button},
+				{Text: button.Text, Contact: button.Contact},
 			})
 		}
 	}
