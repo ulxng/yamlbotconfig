@@ -21,7 +21,7 @@ func (a *App) handleButton(c tele.Context) error {
 }
 
 func (a *App) handleError(c tele.Context) error {
-	return a.sender.Send(c, "errors.unknown")
+	return a.sender.Send(c, "errors.unknown_action")
 }
 
 func (a *App) handleFlow(c tele.Context, input any) error {
