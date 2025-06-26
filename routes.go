@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"ulxng/yamlbotconf/flow"
 
 	tele "gopkg.in/telebot.v4"
@@ -29,6 +30,7 @@ func (a *App) registerRoutes() {
 	})
 	a.bot.Handle("send_onboard_form", a.onOnboardFormComplete)
 	a.bot.Handle("send_support_request", a.onSupportRequestCompete)
+	a.bot.Handle("send_help_request", a.onHelpRequestCompete)
 }
 
 func (a *App) registerFlows() {
@@ -45,5 +47,16 @@ func (a *App) registerFlows() {
 	supportFlow := a.flowRegistry.CreateFlow("support")
 	supportFlow.InitConditionFunc = func(c tele.Context) bool {
 		return c.Callback() != nil && c.Callback().Data == "support.request"
+	}
+
+	helpFlow := a.flowRegistry.CreateFlow("help")
+	helpFlow.InitConditionFunc = func(c tele.Context) bool {
+		if c.Callback() != nil {
+			return false
+		}
+		s := strings.ToLower(c.Message().Text)
+		return strings.Contains(s, "помощь") ||
+			strings.Contains(s, "help") ||
+			strings.Contains(s, "вопрос")
 	}
 }

@@ -7,6 +7,22 @@
 #            message:
 #                text: string
 #       action: string (default: send_message)
+help:
+    id: help
+    steps:
+        idle:
+            next: ask
+        ask:
+            message:
+                text: Вам нужна помощь? Опишите ситуацию
+            code: problem
+            action: collect_text
+            next: complete
+        complete:
+            message:
+                text: |
+                    Спасибо что рассказали. Это очень важно для нас
+            action: send_help_request
 
 support:
     id: support
