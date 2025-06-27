@@ -60,18 +60,7 @@ func (a *App) onOnboardFormComplete(c tele.Context) error {
 
 	session := c.Get("session").(*state.Session)
 	notification := fmt.Sprintf("%s %d\n", "userID", session.UserID)
-	for k, v := range session.Data {
-		switch v.(type) {
-		case string:
-			notification += fmt.Sprintf("%s %s\n", k, v)
-		case *tele.Contact:
-			contact := v.(*tele.Contact)
-			if contact == nil {
-				continue
-			}
-			notification += fmt.Sprintf("%s %s\n", k, v.(*tele.Contact).PhoneNumber)
-		}
-	}
+	notification += session.Data.String()
 	if err := a.userRepository.CreateUser(model.User{ID: session.UserID}); err != nil {
 		return fmt.Errorf("createUser: %w", err)
 	}
@@ -90,7 +79,7 @@ func (a *App) onSupportRequestCompete(c tele.Context) error {
 	}
 	session := c.Get("session").(*state.Session)
 	go func() {
-		if err := a.mailer.Send(fmt.Sprintf("%v", session.Data), "Заявка на техподдержку"); err != nil {
+		if err := a.mailer.Send(session.Data.String(), "Заявка на техподдержку"); err != nil {
 			log.Printf("Failed to send email: %v", err)
 		}
 	}()
@@ -103,7 +92,7 @@ func (a *App) onHelpRequestCompete(c tele.Context) error {
 	}
 	session := c.Get("session").(*state.Session)
 	go func() {
-		if err := a.mailer.Send(fmt.Sprintf("%v", session.Data), "Заявка на помощь"); err != nil {
+		if err := a.mailer.Send(session.Data.String(), "Заявка на помощь"); err != nil {
 			log.Printf("Failed to send email: %v", err)
 		}
 	}()
