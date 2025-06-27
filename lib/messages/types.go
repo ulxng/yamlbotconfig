@@ -1,4 +1,4 @@
-package configurator
+package messages
 
 type Message struct {
 	Text    string   `yaml:"text"`

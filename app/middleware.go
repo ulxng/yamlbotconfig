@@ -1,7 +1,7 @@
 package main
 
 import (
-	"ulxng/blueprintbot/flow"
+	"ulxng/blueprintbot/lib/flow"
 
 	tele "gopkg.in/telebot.v4"
 )

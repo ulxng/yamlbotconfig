@@ -7,5 +7,3 @@ const (
 	Initial  State = "idle"
 	Complete State = "complete"
 )
-
-type Callback func(session *Session, input any) error

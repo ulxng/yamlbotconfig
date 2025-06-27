@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	"log"
-	"ulxng/blueprintbot/flow"
-	"ulxng/blueprintbot/model"
-	"ulxng/blueprintbot/state"
+	"ulxng/blueprintbot/app/model"
+	"ulxng/blueprintbot/lib/flow"
+	"ulxng/blueprintbot/lib/state"
 
 	tele "gopkg.in/telebot.v4"
 )

@@ -5,11 +5,12 @@ import (
 	"log"
 	"os"
 	"time"
-	"ulxng/blueprintbot/configurator"
-	"ulxng/blueprintbot/email"
-	"ulxng/blueprintbot/flow"
-	"ulxng/blueprintbot/state"
-	"ulxng/blueprintbot/storage"
+	"ulxng/blueprintbot/app/email"
+	"ulxng/blueprintbot/app/sender"
+	"ulxng/blueprintbot/app/storage"
+	"ulxng/blueprintbot/lib/flow"
+	"ulxng/blueprintbot/lib/messages"
+	"ulxng/blueprintbot/lib/state"
 
 	"github.com/jessevdk/go-flags"
 	tele "gopkg.in/telebot.v4"
@@ -18,7 +19,7 @@ import (
 type App struct {
 	bot    *tele.Bot
 	store  *state.Store
-	sender configurator.MessageSender
+	sender sender.MessageSender
 	mailer *email.Mailer
 
 	flowRegistry *flow.Registry
@@ -60,13 +61,19 @@ func (a *App) run(opts options) error {
 	}
 	a.bot = bot
 
-	loader := configurator.NewLoader("responses")
-	a.sender = configurator.NewConfigurableSenderAdapter(loader)
+	loader, err := messages.NewLoader("data/config/responses")
+	if err != nil {
+		return fmt.Errorf("messages.NewLoader: %w", err)
+	}
+	a.sender = sender.NewConfigurableSenderAdapter(loader)
 	a.mailer = email.NewMailer(opts.SmtpConfig)
 	a.store = state.NewStore()
 	a.userRepository = storage.NewUserMemoryStorage()
 
-	flowLoader := flow.NewLoader("flow")
+	flowLoader, err := flow.NewLoader("data/config/flows")
+	if err != nil {
+		return fmt.Errorf("flow.NewLoader: %w", err)
+	}
 	a.flowRegistry = flow.NewRegistry(flowLoader)
 
 	a.registerRoutes()

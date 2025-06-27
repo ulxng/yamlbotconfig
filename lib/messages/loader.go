@@ -1,4 +1,4 @@
-package flow
+package messages
 
 import (
 	"fmt"
@@ -10,26 +10,26 @@ import (
 )
 
 type Loader struct {
-	Flows map[string]Flow
+	data map[string]Message
 }
 
-func NewLoader(source string) *Loader {
-	l := Loader{Flows: make(map[string]Flow)}
+func NewLoader(source string) (*Loader, error) {
+	l := Loader{data: make(map[string]Message)}
 	err := l.loadYamlFiles(source)
 	if err != nil {
-		return nil
+		return nil, fmt.Errorf("loadYamlFiles: %w", err)
 	}
-	return &l
+	return &l, nil
 }
 
-func (l *Loader) GetByKey(key string) Flow {
-	return l.Flows[key]
+func (l *Loader) GetByKey(key string) Message {
+	return l.data[key]
 }
 
 func (t *Loader) loadYamlFiles(path string) error {
 	return filepath.WalkDir(path, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
-			return err
+			return fmt.Errorf("walkDir: %w", err)
 		}
 		if d.IsDir() || !strings.HasSuffix(strings.ToLower(d.Name()), ".yaml") {
 			return nil
@@ -37,21 +37,19 @@ func (t *Loader) loadYamlFiles(path string) error {
 
 		data, err := os.ReadFile(path)
 		if err != nil {
-			return fmt.Errorf("read %s: %w", path, err)
+			return fmt.Errorf("os.ReadFile %s: %w", path, err)
 		}
 
-		//todo тут немного другой механизм парсинга нужен
-		//верхний уровень - flow. Под ним
-		var parsed map[string]Flow
+		var parsed map[string]Message
 		if err := yaml.Unmarshal(data, &parsed); err != nil {
-			return fmt.Errorf("parse %s: %w", path, err)
+			return fmt.Errorf("yaml.Unmarshal %s: %w", path, err)
 		}
 
 		for k, v := range parsed {
-			if _, exists := t.Flows[k]; exists {
+			if _, exists := t.data[k]; exists {
 				return fmt.Errorf("duplicate key: %s in file %s", k, path)
 			}
-			t.Flows[k] = v
+			t.data[k] = v
 		}
 
 		return nil
