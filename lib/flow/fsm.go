@@ -1,13 +1,10 @@
 package flow
 
 import (
-	"errors"
-	"ulxng/blueprintbot/state"
+	"ulxng/blueprintbot/lib/state"
 
 	tele "gopkg.in/telebot.v4"
 )
-
-var ErrorEmptyNextStep = errors.New("empty next step")
 
 type FSM struct {
 	flow              Flow

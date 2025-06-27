@@ -1,6 +1,13 @@
 package storage
 
-import "ulxng/blueprintbot/model"
+import (
+	"ulxng/blueprintbot/app/model"
+)
+
+type UserRepository interface {
+	Find(userID int64) (*model.User, error)
+	CreateUser(user model.User) error
+}
 
 type UserMemoryStorage struct {
 	data map[int64]*model.User

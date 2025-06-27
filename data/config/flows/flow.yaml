@@ -3,7 +3,7 @@
 #    steps:
 #        state_name:
 #            next: string
-#            code: string
+#            code: string  # внимание! если key не задан - данные сохраняться не будут
 #            message:
 #                text: string
 #       action: string (default: send_message)

@@ -1,35 +1,37 @@
-package configurator
+package sender
 
 import (
+	"ulxng/blueprintbot/lib/messages"
+
 	tele "gopkg.in/telebot.v4"
 )
 
 type MessageSender interface {
 	Send(c tele.Context, key string) error
 	Edit(c tele.Context, key string) error
-	SendRaw(c tele.Context, message Message) error
+	SendRaw(c tele.Context, message messages.Message) error
 }
 
 // ConfigurableSenderAdapter ищет конфигурацию сообщения по ключу и готовит его к отправке.
 // Методы - обертки над с.Send(), c.Edit() и тд
 type ConfigurableSenderAdapter struct {
-	loader *Loader
+	loader *messages.Loader
 }
 
-func NewConfigurableSenderAdapter(loader *Loader) *ConfigurableSenderAdapter {
+func NewConfigurableSenderAdapter(loader *messages.Loader) *ConfigurableSenderAdapter {
 	return &ConfigurableSenderAdapter{loader: loader}
 }
 
 func (b *ConfigurableSenderAdapter) Send(c tele.Context, messageKey string) error {
 	msg := b.loader.GetByKey(messageKey)
 	if msg.Text == "" {
-		return ErrMessageNotFound
+		return messages.ErrMessageNotFound
 	}
 
 	return b.SendRaw(c, msg)
 }
 
-func (b *ConfigurableSenderAdapter) SendRaw(c tele.Context, msg Message) error {
+func (b *ConfigurableSenderAdapter) SendRaw(c tele.Context, msg messages.Message) error {
 	markup := &tele.ReplyMarkup{}
 	for _, button := range msg.Buttons {
 		markup.InlineKeyboard = append(markup.InlineKeyboard, []tele.InlineButton{
@@ -61,7 +63,7 @@ func (b *ConfigurableSenderAdapter) SendRaw(c tele.Context, msg Message) error {
 func (b *ConfigurableSenderAdapter) Edit(c tele.Context, messageKey string) error {
 	msg := b.loader.GetByKey(messageKey)
 	if msg.Text == "" {
-		return ErrMessageNotFound
+		return messages.ErrMessageNotFound
 	}
 
 	markup := &tele.ReplyMarkup{}
