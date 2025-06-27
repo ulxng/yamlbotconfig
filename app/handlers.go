@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"ulxng/blueprintbot/app/model"
-	"ulxng/blueprintbot/lib/flow"
 	"ulxng/blueprintbot/lib/state"
 
 	tele "gopkg.in/telebot.v4"
@@ -24,30 +23,6 @@ func (a *App) handleButton(c tele.Context) error {
 
 func (a *App) handleError(c tele.Context) error {
 	return a.sender.Send(c, "errors.unknown_action")
-}
-
-func (a *App) handleFlow(c tele.Context, input any) error {
-	if c.Get("fsm") == nil {
-		return ErrFlowNotFound
-	}
-	fsm := c.Get("fsm").(*flow.FSM)
-	session := c.Get("session").(*state.Session)
-	step, err := fsm.HandleStep(session, input)
-	if err != nil {
-		return fmt.Errorf("fsm.HandleStep: %w", err)
-	}
-	if err := a.sender.SendRaw(c, step.Message); err != nil {
-		return fmt.Errorf("sender.SendRaw: %w", err)
-	}
-	if fsm.IsFinished(session) {
-		if step.Action != "" {
-			if err := a.bot.Trigger(step.Action, c); err != nil {
-				log.Printf("bot.Trigger: action: %q, error: %v", step.Action, err)
-			}
-		}
-		a.store.Delete(session)
-	}
-	return nil
 }
 
 func (a *App) onOnboardFormComplete(c tele.Context) error {

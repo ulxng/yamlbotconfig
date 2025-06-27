@@ -9,7 +9,7 @@ import (
 
 func (a *App) registerRoutes() {
 	flowGroup := a.bot.Group()
-	flowGroup.Use(a.FindFSM())
+	flowGroup.Use(a.fsmExecutor.Middleware())
 
 	flowGroup.Handle("/start", a.menuHandler)
 	flowGroup.Handle(tele.OnCallback, a.handleButton)
@@ -18,15 +18,15 @@ func (a *App) registerRoutes() {
 
 	//такие эндпоинты - без flow middleware
 	a.bot.Handle(flow.SendMessage, func(c tele.Context) error {
-		return a.handleFlow(c, nil)
+		return a.fsmExecutor.HandleStep(c, nil)
 	})
 	a.bot.Handle(flow.CollectText, func(c tele.Context) error {
 		input := c.Message().Text
-		return a.handleFlow(c, input)
+		return a.fsmExecutor.HandleStep(c, input)
 	})
 	a.bot.Handle(flow.CollectContact, func(c tele.Context) error {
 		input := c.Message().Contact
-		return a.handleFlow(c, input)
+		return a.fsmExecutor.HandleStep(c, input)
 	})
 	a.bot.Handle("send_onboard_form", a.onOnboardFormComplete)
 	a.bot.Handle("send_support_request", a.onSupportRequestCompete)
