@@ -11,8 +11,7 @@ type FSM struct {
 	InitConditionFunc func(c tele.Context) bool
 }
 
-func NewFSM(loader *Loader, flowID string) *FSM {
-	flow := loader.Flows[flowID]
+func NewFSM(flow Flow) *FSM {
 	flow.InitialState = state.Initial // todo все флоу будут иметь одинаковый initial state
 	return &FSM{flow: flow}
 }
