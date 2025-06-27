@@ -1,12 +1,10 @@
 package state
 
 import (
-	"fmt"
-	"strings"
 	"sync"
 )
 
-// это единственная штука, которая меняется
+// это единственная сущность, которая меняется
 type Session struct {
 	mu      sync.RWMutex
 	stateMu sync.RWMutex
@@ -43,14 +41,4 @@ func (s *Session) GetData(key string) (any, bool) {
 	defer s.mu.RUnlock()
 	val, ok := s.Data[key]
 	return val, ok
-}
-
-type sessionData map[string]any
-
-func (d sessionData) String() string {
-	var b strings.Builder
-	for k, v := range d {
-		b.WriteString(fmt.Sprintf("%s %v\n", k, v))
-	}
-	return b.String()
 }

@@ -45,5 +45,5 @@ func (f *FSM) Start(userID int64) *state.Session {
 }
 
 func (f *FSM) IsFinished(session *state.Session) bool {
-	return session.State() == state.Complete
+	return f.GetCurrentStep(session).NextState == nil
 }
