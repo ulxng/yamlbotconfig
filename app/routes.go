@@ -34,23 +34,20 @@ func (a *App) registerRoutes() {
 }
 
 func (a *App) registerFlows() {
-	greetFlow := a.flowRegistry.CreateFlow("greeting")
-	greetFlow.InitConditionFunc = func(c tele.Context) bool {
+	flow.RegisterFlow(a.flowRegistry, "greeting", func(c tele.Context) bool {
 		userID := c.Sender().ID
 		user, err := a.userRepository.Find(userID)
 		if err != nil {
 			return false
 		}
 		return user == nil
-	}
+	})
 
-	supportFlow := a.flowRegistry.CreateFlow("support")
-	supportFlow.InitConditionFunc = func(c tele.Context) bool {
+	flow.RegisterFlow(a.flowRegistry, "support", func(c tele.Context) bool {
 		return c.Callback() != nil && c.Callback().Data == "support.request"
-	}
+	})
 
-	helpFlow := a.flowRegistry.CreateFlow("help")
-	helpFlow.InitConditionFunc = func(c tele.Context) bool {
+	flow.RegisterFlow(a.flowRegistry, "help", func(c tele.Context) bool {
 		if c.Callback() != nil {
 			return false
 		}
@@ -58,5 +55,5 @@ func (a *App) registerFlows() {
 		return strings.Contains(s, "помощь") ||
 			strings.Contains(s, "help") ||
 			strings.Contains(s, "вопрос")
-	}
+	})
 }

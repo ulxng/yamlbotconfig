@@ -2,18 +2,21 @@ package flow
 
 import (
 	"ulxng/blueprintbot/lib/state"
-
-	tele "gopkg.in/telebot.v4"
 )
 
 type FSM struct {
-	flow              Flow
-	InitConditionFunc func(c tele.Context) bool
+	flow        Flow
+	shouldStart StartCondition
+}
+
+func (f *FSM) setShouldStart(shouldStart StartCondition) {
+	f.shouldStart = shouldStart
 }
 
 func NewFSM(flow Flow) *FSM {
-	flow.InitialState = state.Initial // todo все флоу будут иметь одинаковый initial state
-	return &FSM{flow: flow}
+	return &FSM{flow: flow, shouldStart: func(input any) bool {
+		return false
+	}}
 }
 
 func (f *FSM) HandleStep(session *state.Session, input any) (Step, error) {
@@ -35,10 +38,6 @@ func (f *FSM) HandleStep(session *state.Session, input any) (Step, error) {
 
 func (f *FSM) GetCurrentStep(session *state.Session) Step {
 	return f.flow.Steps[session.State()]
-}
-
-func (f *FSM) Supports(session *state.Session) bool {
-	return session.FlowID == f.flow.ID
 }
 
 func (f *FSM) Start(userID int64) *state.Session {

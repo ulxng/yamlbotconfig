@@ -9,6 +9,7 @@
 #       action: string (default: send_message)
 help:
     id: help
+    initial: idle
     steps:
         idle:
             next: ask
@@ -26,6 +27,7 @@ help:
 
 support:
     id: support
+    initial: idle
     steps:
         idle:
             next: ask_category
@@ -54,6 +56,7 @@ support:
 
 greeting:
     id: greeting
+    initial: idle
     steps:
         #        нужно добавлять этот фиктивный первый шаг. Иначе переключение будет работать некорректно
         idle:
