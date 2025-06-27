@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 	"ulxng/blueprintbot/app/email"
+	"ulxng/blueprintbot/app/fsm"
 	"ulxng/blueprintbot/app/sender"
 	"ulxng/blueprintbot/app/storage"
 	"ulxng/blueprintbot/lib/flow"
@@ -18,10 +19,10 @@ import (
 
 type App struct {
 	bot    *tele.Bot
-	store  state.Store
 	sender sender.MessageSender
 	mailer *email.Mailer
 
+	fsmExecutor  *fsm.Executor
 	flowRegistry *flow.Registry
 
 	userRepository storage.UserRepository
@@ -67,7 +68,6 @@ func (a *App) run(opts options) error {
 	}
 	a.sender = sender.NewConfigurableSenderAdapter(loader)
 	a.mailer = email.NewMailer(opts.SmtpConfig)
-	a.store = state.NewMemoryStore()
 	a.userRepository = storage.NewUserMemoryStorage()
 
 	flowLoader, err := flow.NewLoader("data/config/flows")
@@ -75,6 +75,7 @@ func (a *App) run(opts options) error {
 		return fmt.Errorf("flow.NewLoader: %w", err)
 	}
 	a.flowRegistry = flow.NewRegistry(flowLoader)
+	a.fsmExecutor = fsm.NewExecutor(state.NewMemoryStore(), a.sender, a.flowRegistry, a.bot)
 
 	a.registerRoutes()
 	a.registerFlows()
