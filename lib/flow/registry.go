@@ -16,9 +16,8 @@ func NewRegistry(loader *Loader) *Registry {
 }
 
 func (r *Registry) CreateFlow(flowID string) *FSM {
-	f := NewFSM(r.loader, flowID)
-	r.flows[flowID] = f
-	return f
+	r.flows[flowID] = NewFSM(r.loader.GetByKey(flowID))
+	return r.flows[flowID]
 }
 
 func (r *Registry) FindUserActiveFlow(session *state.Session) *FSM {
