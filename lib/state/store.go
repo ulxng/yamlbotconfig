@@ -2,18 +2,24 @@ package state
 
 import "sync"
 
-type Store struct {
+type Store interface {
+	Get(userID int64) *Session
+	Delete(session *Session)
+	Save(userID int64, session *Session) *Session
+}
+
+type MemoryStore struct {
 	mu   sync.RWMutex
 	pool map[int64]*Session
 }
 
-func NewStore() *Store {
-	return &Store{
+func NewMemoryStore() *MemoryStore {
+	return &MemoryStore{
 		pool: make(map[int64]*Session),
 	}
 }
 
-func (s *Store) Get(userID int64) *Session {
+func (s *MemoryStore) Get(userID int64) *Session {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -23,14 +29,14 @@ func (s *Store) Get(userID int64) *Session {
 	return nil
 }
 
-func (s *Store) Delete(session *Session) {
+func (s *MemoryStore) Delete(session *Session) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	delete(s.pool, session.UserID)
 }
 
-func (s *Store) Save(userID int64, session *Session) *Session {
+func (s *MemoryStore) Save(userID int64, session *Session) *Session {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

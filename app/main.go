@@ -18,7 +18,7 @@ import (
 
 type App struct {
 	bot    *tele.Bot
-	store  *state.Store
+	store  state.Store
 	sender sender.MessageSender
 	mailer *email.Mailer
 
@@ -67,7 +67,7 @@ func (a *App) run(opts options) error {
 	}
 	a.sender = sender.NewConfigurableSenderAdapter(loader)
 	a.mailer = email.NewMailer(opts.SmtpConfig)
-	a.store = state.NewStore()
+	a.store = state.NewMemoryStore()
 	a.userRepository = storage.NewUserMemoryStorage()
 
 	flowLoader, err := flow.NewLoader("data/config/flows")
