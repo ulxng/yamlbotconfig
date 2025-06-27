@@ -1,0 +1,6 @@
+errors.unknown_action:
+    text: Не понял вас. Выберите команду /start для начала
+message.repeat:
+    buttons:
+        -   text: Пройти еще раз
+            code: gift.start

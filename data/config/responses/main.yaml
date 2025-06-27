@@ -1,9 +1,0 @@
-main.menu:
-    text: Разделы
-    buttons:
-        -   text: Курс
-            code: course.faq.intro
-        -   text: Помощь психолога
-            code: psy.faq.intro
-        -   text: Техподдержка
-            code: support.faq.intro
