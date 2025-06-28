@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"ulxng/blueprintbot/lib/state"
 
 	tele "gopkg.in/telebot.v4"
@@ -16,8 +15,5 @@ func (a *App) onFinish(c tele.Context) error {
 		return nil
 	}
 	session := c.Get("session").(*state.Session)
-	if err := c.Send(session.Data.String()); err != nil {
-		return fmt.Errorf("error sending message: %w", err)
-	}
-	return a.sender.Send(c, "message.repeat")
+	return c.Send(session.Data.String())
 }

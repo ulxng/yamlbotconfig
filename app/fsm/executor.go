@@ -50,41 +50,63 @@ func (e *Executor) Middleware() tele.MiddlewareFunc {
 			c.Set("fsm", fsm)
 			c.Set("session", session)
 			c.Set("step", step)
-			//передать управление на этот flow
-			var action flow.Action
-			if step.Action == "" {
-				action = flow.SendMessage
-			} else {
-				action = step.Action
-			}
-			return e.bot.Trigger(action, c)
+			//передать управление на flow endpoint
+			return e.bot.Trigger(flow.Default, c)
+			// todo сразу же тут вызвать HandleStep. Зачем по контексту гонять сессию
 		}
 	}
 }
 
-func (e *Executor) HandleStep(c tele.Context, input any) error {
+func (e *Executor) HandleStep(c tele.Context) error {
 	if c.Get("fsm") == nil {
 		return ErrFlowNotFound
 	}
 	fsm := c.Get("fsm").(*flow.FSM)
 	session := c.Get("session").(*state.Session)
-	step, err := fsm.HandleStep(session, input)
+
+	step := fsm.GetCurrentStep(session)
+	nextStep, err := fsm.HandleStep(session, parseInput(c, step.Type))
 	if err != nil {
 		if !errors.Is(err, flow.ErrorEmptyNextStep) {
 			return fmt.Errorf("fsm.HandleStep: %w", err)
 		}
+		//todo это может аффектить Trigger
 		e.store.Delete(session)
 	}
-	if err := e.sender.SendRaw(c, step.Message); err != nil {
-		return fmt.Errorf("sender.SendRaw: %w", err)
+	//экшн выполняется только на текущем шаге после сохранения ввода
+	if step.Action != "" {
+		if err := e.bot.Trigger(step.Action, c); err != nil {
+			log.Printf("bot.Trigger: action: %q, error: %v", step.Action, err)
+		}
+	}
+	//выполнить дефолтное действие - отправку сообщения
+	if err := e.sender.SendRaw(c, nextStep.Message); err != nil {
+		log.Printf("sender.SendRaw: %v", err)
+	}
+	//после дефолтного действия выполнить кастомный экшн
+	//только если есть сообщение
+	if nextStep.Skip {
+		return e.HandleStep(c)
 	}
 	if fsm.IsFinished(session) {
-		if step.Action != "" {
-			if err := e.bot.Trigger(step.Action, c); err != nil {
-				log.Printf("bot.Trigger: action: %q, error: %v", step.Action, err)
+		//todo сделать так, чтобы в триггер прокидывалось последнее отправленное сообщение. Чтобы на нем можно было делать edit например
+		if nextStep.Action != "" {
+			if err := e.bot.Trigger(nextStep.Action, c); err != nil {
+				log.Printf("bot.Trigger: action: %q, error: %v", nextStep.Action, err)
 			}
 		}
 		e.store.Delete(session)
 	}
 	return nil
+}
+
+func parseInput(c tele.Context, t flow.StepType) any {
+	switch t {
+	case flow.TypeText:
+		return c.Message().Text
+	case flow.TypeContact:
+		return c.Message().Contact
+	default:
+		return nil
+	}
 }

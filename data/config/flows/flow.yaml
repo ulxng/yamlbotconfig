@@ -2,7 +2,7 @@ gift:
     id: gift
     initial: idle
     steps:
-        idle:
+        idle: # атавизм, но пока так
             next: ask_recipient
         ask_recipient:
             message:
@@ -13,7 +13,7 @@ gift:
                     - text: Ребёнку
                     - text: Коллеге
             code: recipient
-            action: collect_text
+            type: text # к этому полю будет прицеплен обработчик ввода
             next: ask_ocassion
         ask_ocassion:
             message:
@@ -23,7 +23,7 @@ gift:
                     - text: Новый год
                     - text: Без повода
             code: occasion
-            action: collect_text
+            type: text
             next: ask_budget
         ask_budget:
             message:
@@ -34,8 +34,8 @@ gift:
                     - text: 3000–10000
                     - text: Неважно
             code: budget
-            action: collect_text
             next: ask_style
+            type: text
         ask_style:
             message:
                 text: Что предпочитает человек?
@@ -45,12 +45,17 @@ gift:
                     - text: Технологии
                     - text: Трудно угодить
             code: style
-            action: collect_text
+            next: preview
+            type: text
+        preview:
+            message:
+                text: Спасибо! Собираем для вас идеи 🎁
+            skip: true  # skip означает, что отправит message, выполнит action - но не будет ждать ввод
+            action: send_help_request
             next: complete
         complete:
             message:
-                text: |
-                    Спасибо! Собираем для вас идеи 🎁
-                answers:
-                    - text: Подобрать еще
-            action: send_help_request
+                text: Выбрать еще подарок
+                buttons:
+                    - text: Повторить
+                      code: repeat # не имеет значения
