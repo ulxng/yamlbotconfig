@@ -22,7 +22,7 @@ type App struct {
 	sender sender.MessageSender
 	mailer *email.Mailer
 
-	fsmExecutor  *fsm.Executor
+	fsmExecutor  *fsm.TelebotExecutor
 	flowRegistry *flow.Registry
 
 	userRepository storage.UserRepository

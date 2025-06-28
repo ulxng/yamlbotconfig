@@ -15,8 +15,6 @@ func (a *App) registerRoutes() {
 	flowGroup.Handle(tele.OnCallback, a.handleError)
 
 	//такие эндпоинты - без flow middleware
-	// обязательный хендлер в проекте. Без него не будет работать fsm. Однако если не нужны кастомные обработчики - этого достаточно, чтобы флоу корректно работал
-	a.bot.Handle(flow.Default, a.fsmExecutor.HandleStep)
 	a.bot.Handle("send_help_request", a.onFinish)
 }
 

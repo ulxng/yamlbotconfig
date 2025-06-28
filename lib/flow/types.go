@@ -27,11 +27,6 @@ type Flow struct {
 
 type Action = string
 
-// набор стандартных экшнов на шаги флоу. Кастомные тоже можно использовать, но эти зафиксированы
-const (
-	Default Action = "default"
-)
-
 type StepType string
 
 const (
