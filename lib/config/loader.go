@@ -10,6 +10,7 @@ import (
 type Loader[T any] interface {
 	Load(path string) error
 	GetByKey(key string) T
+	All() map[string]T
 }
 
 type ParseFunc func(data []byte, path string) error

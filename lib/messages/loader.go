@@ -30,6 +30,10 @@ func (l *Loader) GetByKey(key string) Message {
 	return l.data[key]
 }
 
+func (l *Loader) All() map[string]Message {
+	return l.data
+}
+
 func (l *Loader) ParseData(data []byte, path string) error {
 	var parsed map[string]Message
 	if err := yaml.Unmarshal(data, &parsed); err != nil {
