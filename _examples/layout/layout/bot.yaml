@@ -1,0 +1,23 @@
+settings:
+    token_env: "BOT_TOKEN"
+    long_poller:
+        timeout: 1s
+    locales_dir: "layout/locales"
+commands:
+    /start: Start the bot
+    /help: How to use the bot
+
+buttons:
+    # Shortened reply buttons
+    help: Help
+    back: Back
+    settings: Settings
+
+
+markups:
+    menu:
+        inline: false
+        resize_keyboard: true
+        keyboard:
+            - [help]
+
