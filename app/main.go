@@ -5,10 +5,10 @@ import (
 	"log"
 	"os"
 	"time"
+	"ulxng/blueprintbot/app/config"
 	"ulxng/blueprintbot/app/fsm"
 	"ulxng/blueprintbot/app/sender"
 	"ulxng/blueprintbot/lib/flow"
-	"ulxng/blueprintbot/lib/messages"
 	"ulxng/blueprintbot/lib/state"
 
 	"github.com/jessevdk/go-flags"
@@ -17,7 +17,7 @@ import (
 
 type App struct {
 	bot    *tele.Bot
-	sender sender.Sender
+	sender sender.RoutableSender
 
 	fsmExecutor  *fsm.TelebotExecutor
 	flowRegistry *flow.Registry
@@ -60,11 +60,11 @@ func (a *App) run(opts options) error {
 	}
 	a.bot = bot
 
-	loader, err := messages.NewLoader(messagesConfigPath)
+	loader, err := config.NewLoaderWithNav(messagesConfigPath)
 	if err != nil {
-		return fmt.Errorf("messages.NewLoader: %w", err)
+		return fmt.Errorf("config.NewLoader: %w", err)
 	}
-	a.sender = sender.NewConfigurableSenderAdapter(loader)
+	a.sender = sender.NewConfigurableSenderWithNav(loader)
 
 	flowLoader, err := flow.NewLoader(flowsConfigPath)
 	if err != nil {

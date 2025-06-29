@@ -17,4 +17,5 @@ type Button struct {
 type Answer struct {
 	Text    string `yaml:"text"`
 	Contact bool   `yaml:"request_contact"`
+	Code    string `yaml:"code"`
 }

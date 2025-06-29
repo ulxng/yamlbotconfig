@@ -1,6 +1,8 @@
 package sender
 
 import (
+	"fmt"
+	"ulxng/blueprintbot/app/config"
 	"ulxng/blueprintbot/lib/messages"
 
 	tele "gopkg.in/telebot.v4"
@@ -12,17 +14,20 @@ type Sender interface {
 	SendRaw(c tele.Context, message messages.Message) error
 }
 
-// ConfigurableSenderAdapter ищет конфигурацию сообщения по ключу и готовит его к отправке.
-// Методы - обертки над с.Send(), c.Edit() и тд
-type ConfigurableSenderAdapter struct {
-	loader *messages.Loader
+type RoutableSender interface {
+	NavigateFor(c tele.Context, message string) error
+	Sender
 }
 
-func NewConfigurableSenderAdapter(loader *messages.Loader) *ConfigurableSenderAdapter {
-	return &ConfigurableSenderAdapter{loader: loader}
+type ConfigurableSenderWithNav struct {
+	loader *config.LoaderWithNav
 }
 
-func (b *ConfigurableSenderAdapter) Send(c tele.Context, messageKey string) error {
+func NewConfigurableSenderWithNav(loader *config.LoaderWithNav) *ConfigurableSenderWithNav {
+	return &ConfigurableSenderWithNav{loader: loader}
+}
+
+func (b *ConfigurableSenderWithNav) Send(c tele.Context, messageKey string) error {
 	msg := b.loader.GetByKey(messageKey)
 	if msg.Text == "" {
 		return messages.ErrMessageNotFound
@@ -31,7 +36,7 @@ func (b *ConfigurableSenderAdapter) Send(c tele.Context, messageKey string) erro
 	return b.SendRaw(c, msg)
 }
 
-func (b *ConfigurableSenderAdapter) SendRaw(c tele.Context, msg messages.Message) error {
+func (b *ConfigurableSenderWithNav) SendRaw(c tele.Context, msg messages.Message) error {
 	markup := &tele.ReplyMarkup{}
 	for _, button := range msg.Buttons {
 		markup.InlineKeyboard = append(markup.InlineKeyboard, []tele.InlineButton{
@@ -60,7 +65,7 @@ func (b *ConfigurableSenderAdapter) SendRaw(c tele.Context, msg messages.Message
 	return c.Send(msg.Text, markup)
 }
 
-func (b *ConfigurableSenderAdapter) Edit(c tele.Context, messageKey string) error {
+func (b *ConfigurableSenderWithNav) Edit(c tele.Context, messageKey string) error {
 	msg := b.loader.GetByKey(messageKey)
 	if msg.Text == "" {
 		return messages.ErrMessageNotFound
@@ -86,4 +91,12 @@ func (b *ConfigurableSenderAdapter) Edit(c tele.Context, messageKey string) erro
 		return c.Send(msg.Text, markup)
 	}
 	return c.Edit(msg.Text, markup)
+}
+
+func (b *ConfigurableSenderWithNav) NavigateFor(c tele.Context, text string) error {
+	msg, err := b.loader.GetNextByText(text)
+	if err != nil {
+		return fmt.Errorf("loader.GetNextByText: %w", err)
+	}
+	return b.SendRaw(c, msg)
 }
