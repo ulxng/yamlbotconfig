@@ -6,7 +6,7 @@ import (
 	tele "gopkg.in/telebot.v4"
 )
 
-type MessageSender interface {
+type Sender interface {
 	Send(c tele.Context, key string) error
 	Edit(c tele.Context, key string) error
 	SendRaw(c tele.Context, message messages.Message) error

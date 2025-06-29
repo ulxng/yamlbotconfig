@@ -10,7 +10,7 @@ import (
 
 type botAPI struct {
 	bot    *tele.Bot
-	sender sender.MessageSender
+	sender sender.Sender
 	ctx    tele.Context
 }
 

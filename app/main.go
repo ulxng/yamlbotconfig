@@ -17,7 +17,7 @@ import (
 
 type App struct {
 	bot    *tele.Bot
-	sender sender.MessageSender
+	sender sender.Sender
 
 	fsmExecutor  *fsm.TelebotExecutor
 	flowRegistry *flow.Registry
