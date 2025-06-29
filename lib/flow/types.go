@@ -12,6 +12,8 @@ type Step struct {
 	Message   messages.Message `yaml:"message"`
 	DataCode  string           `yaml:"code"` // key для сохранения данных
 	Action    Action           `yaml:"action"`
+	Type      StepType         `yaml:"type"`
+	Skip      bool             `yaml:"skip"` // не ожидать ответа пользователя
 }
 
 // эта сущность должна быть в единственном экземпляре
@@ -25,11 +27,11 @@ type Flow struct {
 
 type Action = string
 
-// набор стандартных экшнов на шаги флоу. Кастомные тоже можно использовать, но эти зафиксированы
+type StepType string
+
 const (
-	SendMessage    Action = "send_message"
-	CollectText    Action = "collect_text"
-	CollectContact Action = "collect_contact"
+	TypeText    StepType = "text"
+	TypeContact StepType = "contact"
 )
 
 type StartCondition func(any) bool
