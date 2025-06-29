@@ -30,6 +30,10 @@ func (l *Loader) GetByKey(key string) Flow {
 	return l.Flows[key]
 }
 
+func (l *Loader) All() map[string]Flow {
+	return l.Flows
+}
+
 func (l *Loader) ParseData(data []byte, path string) error {
 	var parsed map[string]Flow
 	if err := yaml.Unmarshal(data, &parsed); err != nil {

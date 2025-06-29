@@ -14,7 +14,7 @@ type TelebotExecutor struct {
 	bapi *botAPI
 }
 
-func NewExecutor(store state.Store, sender sender.MessageSender, registry *flow.Registry, bot *tele.Bot) *TelebotExecutor {
+func NewExecutor(store state.Store, sender sender.Sender, registry *flow.Registry, bot *tele.Bot) *TelebotExecutor {
 	api := &botAPI{
 		bot:    bot,
 		sender: sender,
