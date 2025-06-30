@@ -19,7 +19,3 @@ type Answer struct {
 	Contact bool   `yaml:"request_contact"`
 	Link    string `yaml:"link"`
 }
-
-func (a Answer) CallbackUnique() string {
-	return a.Text
-}

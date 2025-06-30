@@ -13,7 +13,7 @@ func (a *App) registerRoutes() {
 	for _, message := range a.loader.All() {
 		for _, answer := range message.Answers {
 			replyButton := answer
-			a.bot.Handle(replyButton, func(c tele.Context) error {
+			a.bot.Handle(replyButton.Text, func(c tele.Context) error {
 				return a.sender.Route(c, c.Text())
 			})
 		}
