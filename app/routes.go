@@ -6,15 +6,23 @@ import (
 
 func (a *App) registerRoutes() {
 	a.bot.Handle("/start", func(c tele.Context) error {
-		return a.sender.Send(c, "main.menu")
+		return a.sender.Send(c, "root")
 	})
-	a.bot.Handle(tele.OnText, a.handleError, func(next tele.HandlerFunc) tele.HandlerFunc {
-		return func(c tele.Context) error {
-			if err := a.sender.NavigateFor(c, c.Text()); err != nil {
-				return next(c)
-			}
+
+	//добавляем динамические эндпоинты для text
+	for _, message := range a.loader.All() {
+		for _, answer := range message.Answers {
+			replyButton := answer
+			a.bot.Handle(replyButton, func(c tele.Context) error {
+				return a.sender.Route(c, c.Text())
+			})
+		}
+	}
+	a.bot.Handle(tele.OnCallback, func(c tele.Context) error {
+		if c.Callback() == nil {
 			return nil
 		}
+		return a.sender.Send(c, c.Callback().Data)
 	})
 }
 

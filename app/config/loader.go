@@ -6,18 +6,23 @@ import (
 	"ulxng/blueprintbot/lib/messages"
 )
 
-type LoaderWithNav struct {
-	// dictionary answer.text => message.code
+type NavigationLoader interface {
+	config.Loader[messages.Message]
+	messages.Navigator
+}
+
+type NavigableLoader struct {
+	// dictionary: answer.text => message.code
 	replyButtonsCodes map[string]string
 	config.Loader[messages.Message]
 }
 
-func NewLoaderWithNav(source string) (*LoaderWithNav, error) {
+func NewNavigableLoader(source string) (*NavigableLoader, error) {
 	l, err := messages.NewLoader(source)
 	if err != nil {
-		return nil, fmt.Errorf("config.NewLoaderWithNav: %w", err)
+		return nil, fmt.Errorf("config.NewNavigableLoader: %w", err)
 	}
-	loader := &LoaderWithNav{
+	loader := &NavigableLoader{
 		replyButtonsCodes: make(map[string]string),
 		Loader:            l,
 	}
@@ -25,17 +30,17 @@ func NewLoaderWithNav(source string) (*LoaderWithNav, error) {
 	return loader, nil
 }
 
-func (l *LoaderWithNav) buildTextToNextMap() {
+func (l *NavigableLoader) buildTextToNextMap() {
 	for _, msg := range l.All() {
 		for _, btn := range msg.Answers {
-			if btn.Code != "" {
-				l.replyButtonsCodes[btn.Text] = btn.Code
+			if btn.Link != "" {
+				l.replyButtonsCodes[btn.Text] = btn.Link
 			}
 		}
 	}
 }
 
-func (l *LoaderWithNav) GetNextByText(text string) (messages.Message, error) {
+func (l *NavigableLoader) GetNextByText(text string) (messages.Message, error) {
 	if val, ok := l.replyButtonsCodes[text]; ok {
 		return l.GetByKey(val), nil
 	} else {

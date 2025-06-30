@@ -7,6 +7,7 @@ import (
 	"time"
 	"ulxng/blueprintbot/app/config"
 	"ulxng/blueprintbot/app/fsm"
+	"ulxng/blueprintbot/app/resolver"
 	"ulxng/blueprintbot/app/sender"
 	"ulxng/blueprintbot/lib/flow"
 	"ulxng/blueprintbot/lib/state"
@@ -21,6 +22,7 @@ type App struct {
 
 	fsmExecutor  *fsm.TelebotExecutor
 	flowRegistry *flow.Registry
+	loader       config.NavigationLoader
 }
 
 const (
@@ -60,11 +62,13 @@ func (a *App) run(opts options) error {
 	}
 	a.bot = bot
 
-	loader, err := config.NewLoaderWithNav(messagesConfigPath)
+	loader, err := config.NewNavigableLoader(messagesConfigPath)
 	if err != nil {
 		return fmt.Errorf("config.NewLoader: %w", err)
 	}
-	a.sender = sender.NewConfigurableSenderWithNav(loader)
+	a.loader = loader
+	lt := resolver.NewNavigableResolver(loader)
+	a.sender = sender.NewSimpleRoutableSender(lt)
 
 	flowLoader, err := flow.NewLoader(flowsConfigPath)
 	if err != nil {
