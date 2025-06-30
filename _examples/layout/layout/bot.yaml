@@ -1,0 +1,44 @@
+settings:
+    token_env: "BOT_TOKEN"
+    long_poller:
+        timeout: 1s
+    locales_dir: "layout/locales"
+commands:
+    /start: Start the bot
+    /help: How to use the bot
+
+buttons:
+    # Shortened reply buttons
+    help: Help
+    back: <- Back
+    settings: Settings
+    reset:
+        unique: reset
+        text: Reset
+    account: 👤Мои данные
+    notification: 🔕 Настройка уведомлений
+    accept: Да
+    reject: Нет
+
+
+markups:
+    menu:
+        inline: false
+        resize_keyboard: true
+        keyboard:
+            - [ settings, help ]
+    back:
+        inline: true
+        keyboard:
+            - [ back ]
+    settings:
+        inline: false
+        resize_keyboard: true
+        keyboard:
+            - [ account,notification ]
+            - [ back ]
+    notification:
+        inline: true
+        keyboard:
+            - [ accept,reject ]
+            - [ back ]
