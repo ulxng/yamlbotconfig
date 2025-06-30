@@ -1,42 +1,47 @@
 errors.unknown_action:
     text: Не понял вас. Выберите команду /start для начала
+root:
+    text: "👋 Добро пожаловать! "
+    buttons:
+        - text: Меню
+          code: main.menu
 main.menu:
-    text: "👋 Добро пожаловать! Выберите раздел:"
+    text: "Выберите раздел:"
     answers:
         - text: "🛒 Каталог"
-          code: products.catalog
+          link: products.catalog
         - text: "🆘 Поддержка"
-          code: support.faq.intro
+          link: support.faq.intro
         - text: "📰 Новости"
-          code: news.latest
+          link: news.latest
         - text: "📄 О нас"
-          code: about.company
+          link: about.company
         - text: "📞 Контакты"
-          code: contact.info
+          link: contact.info
 
 products.catalog:
     text: "📦 Наш каталог:"
     answers:
         - text: "🆕 Новинки"
-          code: products.new
+          link: products.new
         - text: "🔥 Хиты продаж"
-          code: products.bestsellers
+          link: products.bestsellers
         - text: "💰 Скидки"
-          code: products.sales
+          link: products.sales
         - text: "← Назад"
-          code: main.menu
+          link: main.menu
 
 support.faq.intro:
     text: "❓ Часто задаваемые вопросы:"
     answers:
         - text: "❔ Какие услуги вы предоставляете?"
-          code: support.faq.services
+          link: support.faq.services
         - text: "💲 Какова стоимость и условия оплаты?"
-          code: support.faq.price
+          link: support.faq.price
         - text: "📦 Пакетные предложения"
-          code: support.faq.pack
+          link: support.faq.pack
         - text: "← Назад"
-          code: main.menu
+          link: main.menu
 
 products.new:
     text: |
@@ -44,7 +49,7 @@ products.new:
         Ознакомьтесь с последними поступлениями в нашем каталоге.
     answers:
         - text: "← Назад"
-          code: products.catalog
+          link: products.catalog
 
 products.bestsellers:
     text: |
@@ -52,7 +57,7 @@ products.bestsellers:
         Эти товары пользуются наибольшим спросом.
     answers:
         - text: "← Назад"
-          code: products.catalog
+          link: products.catalog
 
 products.sales:
     text: |
@@ -60,7 +65,7 @@ products.sales:
         Акционные предложения и товары по сниженной цене.
     answers:
         - text: "← Назад"
-          code: products.catalog
+          link: products.catalog
 
 support.faq.services:
     text: |
@@ -68,7 +73,7 @@ support.faq.services:
         Мы предоставляем техническую поддержку, консультации и индивидуальные решения.
     answers:
         - text: "← Назад"
-          code: support.faq.intro
+          link: support.faq.intro
 
 support.faq.price:
     text: |
@@ -76,7 +81,7 @@ support.faq.price:
         Стоимость зависит от типа услуги. Оплата возможна онлайн или по безналичному расчёту.
     answers:
         - text: "← Назад"
-          code: support.faq.intro
+          link: support.faq.intro
 
 support.faq.pack:
     text: |
@@ -84,7 +89,7 @@ support.faq.pack:
         Выгодные комплекты услуг по сниженной цене.
     answers:
         - text: "← Назад"
-          code: support.faq.intro
+          link: support.faq.intro
 
 news.latest:
     text: |
@@ -92,7 +97,7 @@ news.latest:
         Актуальные обновления, новинки и анонсы.
     answers:
         - text: "← Назад"
-          code: main.menu
+          link: main.menu
 
 about.company:
     text: |
@@ -100,7 +105,7 @@ about.company:
         Мы — команда профессионалов, работающая на рынке с [год].
     answers:
         - text: "← Назад"
-          code: main.menu
+          link: main.menu
 
 contact.info:
     text: |
@@ -108,4 +113,4 @@ contact.info:
         Связаться с нами можно по почте support@example.com или по телефону +7 (000) 000-00-00.
     answers:
         - text: "← Назад"
-          code: main.menu
+          link: main.menu
